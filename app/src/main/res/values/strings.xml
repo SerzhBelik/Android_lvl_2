@@ -6,13 +6,18 @@
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
-    <string name="find_city">find city</string>
-    <string name="lang">en/ru</string>
-    <string name="cels">celsius</string>
-    <string name="fahren">fahrenheit</string>
-    <string name="units">units of measurement</string>
-    <string name="abour_dev">about developers</string>
-    <string name="feedback">feedback</string>
+    <string name="find_city">Find city</string>
+    <string name="lang">En/Ru</string>
+    <string name="cels">Celsius</string>
+    <string name="fahren">Fahrenheit</string>
+    <string name="units">Units of measurement</string>
+    <string name="abour_dev">About developers</string>
+    <string name="feedback">Feedback</string>
+    <string name="Moscow">Moscow</string>
+    <string name="Peterburg">S.Peterburg</string>
+    <string name="NNovgorod">N. Novgorod</string>
+    <string name="wind_val">3 mps</string>
+    <string name="humid_val"> 755 mm Hg</string>
 
 
 </resources>

@@ -44,7 +44,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
                 android:padding="10dp"
-                android:text="Москва"
+                android:text="@string/Moscow"
                 app:layout_constraintBottom_toTopOf="@+id/wind"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -93,7 +93,7 @@
                 android:layout_marginTop="59dp"
                 android:layout_marginEnd="16dp"
                 android:padding="10dp"
-                android:text="3 м/с"
+                android:text="@string/wind_val"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -116,7 +116,7 @@
                 android:layout_marginStart="5dp"
                 android:layout_marginBottom="8dp"
                 android:padding="10dp"
-                android:text="755 мм рт. ст."
+                android:text="@string/humid_val"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/press" />
 
@@ -170,7 +170,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
                 android:padding="10dp"
-                android:text="С. Петербург"
+                android:text="@string/Peterburg"
                 app:layout_constraintBottom_toTopOf="@+id/wind"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.501"
@@ -223,7 +223,7 @@
                 android:layout_marginTop="76dp"
                 android:layout_marginEnd="16dp"
                 android:padding="10dp"
-                android:text="3 м/с"
+                android:text="@string/wind_val"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -246,7 +246,7 @@
                 android:layout_marginStart="5dp"
                 android:layout_marginBottom="8dp"
                 android:padding="10dp"
-                android:text="755 мм рт. ст."
+                android:text="@string/humid_val"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/press" />
 
@@ -303,7 +303,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
                 android:padding="10dp"
-                android:text="Н. Новгород"
+                android:text="@string/NNovgorod"
                 app:layout_constraintBottom_toTopOf="@+id/wind"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.501"
@@ -356,7 +356,7 @@
                 android:layout_marginTop="76dp"
                 android:layout_marginEnd="16dp"
                 android:padding="10dp"
-                android:text="3 м/с"
+                android:text="@string/wind_val"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -379,7 +379,7 @@
                 android:layout_marginStart="5dp"
                 android:layout_marginBottom="8dp"
                 android:padding="10dp"
-                android:text="755 мм рт. ст."
+                android:text="@string/humid_val"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/press" />
 

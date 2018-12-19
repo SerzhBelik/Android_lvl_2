@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">Погода</string>
+    <string name="navigation_drawer_open">Открыть навигационную панель</string>
+    <string name="navigation_drawer_close">закрыть навигационную панель</string>
+    <string name="nav_header_title">IvanIvanov@gmail.com</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Навигационный заголовок</string>
+    <string name="action_settings">Настройки</string>
+    <string name="find_city">Найти город</string>
+    <string name="lang">англ/русс</string>
+    <string name="cels">Цельсий</string>
+    <string name="fahren">Фаренгейт</string>
+    <string name="units">единицы измерения</string>
+    <string name="abour_dev">О разработчике</string>
+    <string name="feedback">Обратная связь</string>
+    <string name="Moscow">Москва</string>
+    <string name="Peterburg">С.Петербург</string>
+    <string name="NNovgorod">Н.Новгород</string>
+    <string name="wind_val">3 м/с</string>
+    <string name="humid_val"> 755 мм рт. ст.</string>
+
+</resources>

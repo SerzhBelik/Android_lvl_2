@@ -1,5 +1,7 @@
 package com.example.belikov.myapplication;
 
+import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -14,8 +16,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import java.util.Locale;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private Locale locale;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,7 +82,11 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.lang) {
             Toast.makeText(this, "lang", Toast.LENGTH_SHORT).show();
-            //FIXME
+            if (Locale.getDefault().getLanguage().equals("en")){
+                setLocale("ru");
+            } else setLocale("en");
+            startActivityForResult(new Intent(this, MainActivity.class), 0);
+
             return true;
         }
 
@@ -107,5 +117,13 @@ public class MainActivity extends AppCompatActivity
     public void onAvatarClick(View view){
         Toast.makeText(this, "avatar", Toast.LENGTH_SHORT).show();
         //FIXME
+    }
+
+    private void setLocale(String lang){
+        locale = new Locale(lang);
+        Locale.setDefault(locale);
+        Configuration configuration = new Configuration();
+        configuration.locale = locale;
+        getBaseContext().getResources().updateConfiguration(configuration, null);
     }
 }
