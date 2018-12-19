@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity
         //noinspection SimplifiableIfStatement
         if (id == R.id.find_city) {
             Toast.makeText(this, "find_city", Toast.LENGTH_SHORT).show();
-            //FIXME
+            findCity();
             return true;
         }
 
@@ -93,6 +93,7 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
+
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -100,7 +101,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.celsius) {
-            // Handle the camera action
+
         } else if (id == R.id.fahrenheit) {
 
         } else if (id == R.id.about_dev) {
@@ -116,6 +117,11 @@ public class MainActivity extends AppCompatActivity
 
     public void onAvatarClick(View view){
         Toast.makeText(this, "avatar", Toast.LENGTH_SHORT).show();
+        setAnAvatar();
+        //FIXME
+    }
+
+    private void setAnAvatar() {
         //FIXME
     }
 
@@ -125,5 +131,9 @@ public class MainActivity extends AppCompatActivity
         Configuration configuration = new Configuration();
         configuration.locale = locale;
         getBaseContext().getResources().updateConfiguration(configuration, null);
+    }
+
+    private void findCity() {
+        //FIXME
     }
 }
