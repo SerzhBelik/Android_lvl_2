@@ -7,10 +7,10 @@
     <string name="nav_header_desc">Навигационный заголовок</string>
     <string name="action_settings">Настройки</string>
     <string name="find_city">Найти город</string>
-    <string name="lang">англ/русс</string>
+    <string name="lang">Aнгл/Русс</string>
     <string name="cels">Цельсий</string>
     <string name="fahren">Фаренгейт</string>
-    <string name="units">единицы измерения</string>
+    <string name="units">Eдиницы измерения</string>
     <string name="abour_dev">О разработчике</string>
     <string name="feedback">Обратная связь</string>
     <string name="Moscow">Москва</string>
@@ -18,5 +18,6 @@
     <string name="NNovgorod">Н.Новгород</string>
     <string name="wind_val">3 м/с</string>
     <string name="humid_val"> 755 мм рт. ст.</string>
+    <string name="for_ten_days">За десять дней</string>
 
 </resources>

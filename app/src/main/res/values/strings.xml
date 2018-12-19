@@ -18,6 +18,7 @@
     <string name="NNovgorod">N. Novgorod</string>
     <string name="wind_val">3 mps</string>
     <string name="humid_val"> 755 mm Hg</string>
+    <string name="for_ten_days">For ten days</string>
 
 
 </resources>

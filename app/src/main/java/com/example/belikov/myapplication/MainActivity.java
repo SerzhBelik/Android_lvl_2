@@ -5,6 +5,9 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.widget.CardView;
+import android.view.ContextMenu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -29,6 +32,14 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        CardView cardView1 = findViewById(R.id.cardView1);
+        CardView cardView2 = findViewById(R.id.cardView2);
+        CardView cardView3 = findViewById(R.id.cardView3);
+
+        registerForContextMenu(cardView1);
+        registerForContextMenu(cardView2);
+        registerForContextMenu(cardView3);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -101,17 +112,38 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.celsius) {
+            Toast.makeText(this, "celsius", Toast.LENGTH_SHORT).show();
 
         } else if (id == R.id.fahrenheit) {
+            Toast.makeText(this, "fahrenheit", Toast.LENGTH_SHORT).show();
 
         } else if (id == R.id.about_dev) {
+            Toast.makeText(this, "about developers", Toast.LENGTH_SHORT).show();
 
         } else if (id == R.id.feedback) {
+            Toast.makeText(this, "feedback", Toast.LENGTH_SHORT).show();
 
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.context_menu, menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.for_ten_days){
+            Toast.makeText(this, "create a new fragment", Toast.LENGTH_SHORT).show();
+            // create a new fragment
+
+        }
         return true;
     }
 
