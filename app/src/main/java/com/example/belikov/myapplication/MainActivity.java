@@ -2,6 +2,10 @@ package com.example.belikov.myapplication;
 
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -17,14 +21,33 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.List;
 import java.util.Locale;
+
+import static android.hardware.Sensor.TYPE_AMBIENT_TEMPERATURE;
+import static android.hardware.Sensor.TYPE_RELATIVE_HUMIDITY;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private Locale locale;
+    private SensorManager sensorManager;
+    private Sensor temperatureSensor;
+    private Sensor humiditySensor;
+    private TextView temperTextView;
+    private TextView humidTextView;
+
+    private static final String CELSIUS = " °C";
+    private static final String FAHRENHEIT = " °F";
+    private static final String PERCENT = " %";
+
+    private boolean isCelsius = true;
+
+    private float valueTemper;
+    private float valueHumid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,14 +55,28 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
-        CardView cardView1 = findViewById(R.id.cardView1);
-        CardView cardView2 = findViewById(R.id.cardView2);
-        CardView cardView3 = findViewById(R.id.cardView3);
+        temperatureSensor = sensorManager.getDefaultSensor(TYPE_AMBIENT_TEMPERATURE);
+        humiditySensor = sensorManager.getDefaultSensor(TYPE_RELATIVE_HUMIDITY);
 
-        registerForContextMenu(cardView1);
-        registerForContextMenu(cardView2);
-        registerForContextMenu(cardView3);
+        sensorManager.registerListener(listenerTemper, temperatureSensor,
+                SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(listenerHumid, humiditySensor,
+                SensorManager.SENSOR_DELAY_NORMAL);
+
+
+        temperTextView = findViewById(R.id.temperature);
+        humidTextView = findViewById(R.id.humidity);
+
+
+//        CardView cardView1 = findViewById(R.id.cardView1);
+//        CardView cardView2 = findViewById(R.id.cardView2);
+//        CardView cardView3 = findViewById(R.id.cardView3);
+
+//        registerForContextMenu(cardView1);
+//        registerForContextMenu(cardView2);
+//        registerForContextMenu(cardView3);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -58,6 +95,13 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        sensorManager.unregisterListener(listenerTemper, temperatureSensor);
+        sensorManager.unregisterListener(listenerHumid, humiditySensor);
     }
 
     @Override
@@ -109,9 +153,11 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.celsius) {
+            isCelsius = true;
             Toast.makeText(this, "celsius", Toast.LENGTH_SHORT).show();
 
         } else if (id == R.id.fahrenheit) {
+            isCelsius = false;
             Toast.makeText(this, "fahrenheit", Toast.LENGTH_SHORT).show();
 
         } else if (id == R.id.about_dev) {
@@ -165,4 +211,53 @@ public class MainActivity extends AppCompatActivity
     private void findCity() {
         //FIXME
     }
+
+    SensorEventListener listenerTemper = new SensorEventListener() {
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        }
+
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            valueTemper = event.values[0];
+            showTemperSensors();
+        }
+    };
+
+    SensorEventListener listenerHumid = new SensorEventListener() {
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        }
+
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            showHumidSensors(event);
+        }
+    };
+
+    private void showTemperSensors(){
+        if (isCelsius){
+            setCelsiusParam();
+        } else setFahrenParam();
+
+    }
+
+    private void showHumidSensors(SensorEvent event){
+        humidTextView.setText(humidTextView.getText().toString() + " " + event.values[0] + PERCENT);
+    }
+
+    private void setCelsiusParam(){
+        temperTextView.setText(temperTextView.getText().toString() + " " + valueTemper + CELSIUS);
+    }
+
+    private void setFahrenParam(){
+        temperTextView.setText(temperTextView.getText().toString() + " " + valueTemper + FAHRENHEIT);
+    }
+
+
+
 }
+
+
