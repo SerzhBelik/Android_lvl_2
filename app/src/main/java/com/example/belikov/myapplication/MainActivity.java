@@ -154,10 +154,12 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.celsius) {
             isCelsius = true;
+            setCelsiusParam();
             Toast.makeText(this, "celsius", Toast.LENGTH_SHORT).show();
 
         } else if (id == R.id.fahrenheit) {
             isCelsius = false;
+            setFahrenParam();
             Toast.makeText(this, "fahrenheit", Toast.LENGTH_SHORT).show();
 
         } else if (id == R.id.about_dev) {
@@ -249,11 +251,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void setCelsiusParam(){
-        temperTextView.setText(temperTextView.getText().toString() + " " + valueTemper + CELSIUS);
+        temperTextView.setText(getResources().getString(R.string.temper) + " " + valueTemper + CELSIUS);
     }
 
     private void setFahrenParam(){
-        temperTextView.setText(temperTextView.getText().toString() + " " + valueTemper + FAHRENHEIT);
+        temperTextView.setText(getResources().getString(R.string.temper) + " " + ((valueTemper*9/5+32)) + FAHRENHEIT);
     }
 
 
