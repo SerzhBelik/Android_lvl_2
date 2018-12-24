@@ -19,6 +19,9 @@
     <string name="wind_val">3 mps</string>
     <string name="humid_val"> 755 mm Hg</string>
     <string name="for_ten_days">For ten days</string>
+    <string name="current_param">Current parameters</string>
+    <string name="temper">Temperature:</string>
+    <string name="humid">Humidity:</string>
 
 
 </resources>
