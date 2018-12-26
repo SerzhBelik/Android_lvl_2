@@ -20,7 +20,6 @@ public class MyService extends Service {
 
     @Override
     public void onCreate() {
-        // Служба создается
         super.onCreate();
         timer = new Timer();
         getParams();

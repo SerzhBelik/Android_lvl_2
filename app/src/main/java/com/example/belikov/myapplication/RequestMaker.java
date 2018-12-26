@@ -1,7 +1,6 @@
 package com.example.belikov.myapplication;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 // Делатель запросов (класс, умеющий запрашивать страницы)
 public class RequestMaker {
