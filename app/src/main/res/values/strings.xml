@@ -22,6 +22,11 @@
     <string name="current_param">Current parameters</string>
     <string name="temper">Temperature:</string>
     <string name="humid">Humidity:</string>
+    <string name="wind">Wind:</string>
+    <string name="press">Pressure:</string>
+    <string name="ok">OK</string>
+    <string name="avg">Calculate averages for</string>
+    <string name="years">years</string>
 
 
 </resources>
