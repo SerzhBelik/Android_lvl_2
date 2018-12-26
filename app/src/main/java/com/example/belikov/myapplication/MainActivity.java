@@ -1,6 +1,9 @@
 package com.example.belikov.myapplication;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -34,20 +37,31 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private Locale locale;
+
     private SensorManager sensorManager;
     private Sensor temperatureSensor;
     private Sensor humiditySensor;
+
     private TextView temperTextView;
     private TextView humidTextView;
+    private TextView windTextView;
+    private TextView pressTextView;
 
     private static final String CELSIUS = " °C";
     private static final String FAHRENHEIT = " °F";
     private static final String PERCENT = " %";
+    public final static String BROADCAST_ACTION = "com.example.belikov.myapplication";
+    public static final String TEMPER = "temperature";
+    public static final String WIND = "wind";
+    public static final String HUMIDITY = "humid";
+    public static final String PRESSURE = "press";
+
 
     private boolean isCelsius = true;
 
     private float valueTemper;
-    private float valueHumid;
+
+    private BroadcastReceiver br;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +82,10 @@ public class MainActivity extends AppCompatActivity
 
         temperTextView = findViewById(R.id.temperature);
         humidTextView = findViewById(R.id.humidity);
+        windTextView = findViewById(R.id.wind);
+        pressTextView = findViewById(R.id.pressure);
+
+
 
 
 //        CardView cardView1 = findViewById(R.id.cardView1);
@@ -95,7 +113,30 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        br = new BroadcastReceiver() {
+            // действия при получении сообщений
+            public void onReceive(Context context, Intent intent) {
+                //FIXME
+                valueTemper = intent.getIntExtra(TEMPER,0);
+                setParams(intent);
+            }
+        };
+        // создаем фильтр для BroadcastReceiver
+        IntentFilter intFilt = new IntentFilter(BROADCAST_ACTION);
+        // регистрируем (включаем) BroadcastReceiver
+        registerReceiver(br, intFilt);
+
+        startService(new Intent(MainActivity.this, MyService.class));
     }
+
+    private void setParams(Intent intent) {
+        showTemper();
+        showHumid(intent);
+        showWind(intent);
+        showPress(intent);
+    }
+
 
     @Override
     protected void onPause() {
@@ -223,7 +264,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onSensorChanged(SensorEvent event) {
             valueTemper = event.values[0];
-            showTemperSensors();
+            showTemper();
         }
     };
 
@@ -239,7 +280,7 @@ public class MainActivity extends AppCompatActivity
         }
     };
 
-    private void showTemperSensors(){
+    private void showTemper(){
         if (isCelsius){
             setCelsiusParam();
         } else setFahrenParam();
@@ -248,6 +289,18 @@ public class MainActivity extends AppCompatActivity
 
     private void showHumidSensors(SensorEvent event){
         humidTextView.setText(humidTextView.getText().toString() + " " + event.values[0] + PERCENT);
+    }
+
+    private void showHumid(Intent intent){
+        humidTextView.setText(getResources().getString(R.string.humid) + " " + intent.getIntExtra(HUMIDITY, 0) + PERCENT);
+    }
+
+    private void showWind(Intent intent) {
+        windTextView.setText(getResources().getString(R.string.wind) + " " + intent.getFloatExtra(WIND, 0));
+    }
+
+    private void showPress(Intent intent) {
+        pressTextView.setText(getResources().getString(R.string.press) + " " + intent.getIntExtra(PRESSURE, 0));
     }
 
     private void setCelsiusParam(){
