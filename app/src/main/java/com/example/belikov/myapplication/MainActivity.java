@@ -1,5 +1,6 @@
 package com.example.belikov.myapplication;
 
+import android.app.FragmentManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -12,6 +13,7 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.CardView;
 import android.view.ContextMenu;
 import android.view.MenuInflater;
@@ -24,6 +26,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,6 +50,7 @@ public class MainActivity extends AppCompatActivity
     private TextView humidTextView;
     private TextView windTextView;
     private TextView pressTextView;
+    private EditText editTextYears;
 
     private static final String CELSIUS = " °C";
     private static final String FAHRENHEIT = " °F";
@@ -55,11 +60,13 @@ public class MainActivity extends AppCompatActivity
     public static final String WIND = "wind";
     public static final String HUMIDITY = "humid";
     public static final String PRESSURE = "press";
+    public static final String YEARS = "years";
 
 
     private boolean isCelsius = true;
 
     private float valueTemper;
+    private int years;
 
     private BroadcastReceiver br;
 
@@ -84,9 +91,7 @@ public class MainActivity extends AppCompatActivity
         humidTextView = findViewById(R.id.humidity);
         windTextView = findViewById(R.id.wind);
         pressTextView = findViewById(R.id.pressure);
-
-
-
+        editTextYears = findViewById(R.id.years_value);
 
 //        CardView cardView1 = findViewById(R.id.cardView1);
 //        CardView cardView2 = findViewById(R.id.cardView2);
@@ -128,6 +133,18 @@ public class MainActivity extends AppCompatActivity
         registerReceiver(br, intFilt);
 
         startService(new Intent(MainActivity.this, MyService.class));
+
+        Button ok = findViewById(R.id.ok);
+        ok.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //FIXME
+                years = Integer.parseInt(editTextYears.getText().toString());
+                Intent intent = new Intent(MainActivity.this, SecondActivity.class);
+                intent.putExtra(YEARS, years);
+                startActivity(intent);
+            }
+        });
     }
 
     private void setParams(Intent intent) {

@@ -64,6 +64,7 @@
         />
 
         <EditText
+            android:id="@+id/years_value"
             android:layout_width="40dp"
             android:layout_height="wrap_content"
             android:inputType="number"/>
@@ -77,13 +78,13 @@
             />
 
         <Button
+            android:id="@+id/ok"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/ok" />
 
 
     </LinearLayout>
-
 
 
 </LinearLayout>

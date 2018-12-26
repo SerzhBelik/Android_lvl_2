@@ -42,7 +42,6 @@ public class MyService extends Service {
                     intent.putExtra(MainActivity.WIND, wind);
                     intent.putExtra(MainActivity.HUMIDITY, humidi);
                     intent.putExtra(MainActivity.PRESSURE, press);
-
                     sendBroadcast(intent);
                 }
             };

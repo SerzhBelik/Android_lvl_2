@@ -25,7 +25,7 @@
     <string name="wind">Ветер:</string>
     <string name="press">Давление:</string>
     <string name="ok">OK</string>
-    <string name="avg">Расчитать среднее значение за</string>
+    <string name="avg">Расчитать среднюю температуру за</string>
     <string name="years">год(а) (лет)</string>
 
 </resources>
