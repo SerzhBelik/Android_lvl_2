@@ -47,6 +47,7 @@ public class RequestMaker {
             int days = integers[0] * 365;
             int sum = 0;
             float result;
+            publishProgress("Calculate");
             for (int i = 0; i < days; i++){
                 sum+=(int)(Math.random()*40 -20);
                 for(int j = 0; j < 100000; j++){
@@ -54,6 +55,7 @@ public class RequestMaker {
                 }
             }
             result = (float) sum/days;
+            publishProgress("Complete");
             return result;
         }
 

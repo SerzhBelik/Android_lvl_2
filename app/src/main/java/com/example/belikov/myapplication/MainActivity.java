@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -26,6 +27,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -45,12 +48,15 @@ public class MainActivity extends AppCompatActivity
     private SensorManager sensorManager;
     private Sensor temperatureSensor;
     private Sensor humiditySensor;
+    private BroadcastReceiver br;
+    private SharedPreferences sharedPref;
 
     private TextView temperTextView;
     private TextView humidTextView;
     private TextView windTextView;
     private TextView pressTextView;
     private EditText editTextYears;
+    private AutoCompleteTextView autoCompleteTextView;
 
     private static final String CELSIUS = " °C";
     private static final String FAHRENHEIT = " °F";
@@ -61,14 +67,14 @@ public class MainActivity extends AppCompatActivity
     public static final String HUMIDITY = "humid";
     public static final String PRESSURE = "press";
     public static final String YEARS = "years";
-
+    public static final String CITY = "city";
 
     private boolean isCelsius = true;
 
     private float valueTemper;
     private int years;
 
-    private BroadcastReceiver br;
+    private final String[]cities = {"Moscow", "S.Petersburg", "N.Novgorod", "Novosibirsk"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,14 +98,16 @@ public class MainActivity extends AppCompatActivity
         windTextView = findViewById(R.id.wind);
         pressTextView = findViewById(R.id.pressure);
         editTextYears = findViewById(R.id.years_value);
+        autoCompleteTextView = findViewById(R.id.autoCompleteTextView);
 
-//        CardView cardView1 = findViewById(R.id.cardView1);
-//        CardView cardView2 = findViewById(R.id.cardView2);
-//        CardView cardView3 = findViewById(R.id.cardView3);
+        autoCompleteTextView.setAdapter(new ArrayAdapter<>(this,
+                android.R.layout.simple_dropdown_item_1line, cities));
 
-//        registerForContextMenu(cardView1);
-//        registerForContextMenu(cardView2);
-//        registerForContextMenu(cardView3);
+        sharedPref = getSharedPreferences(CITY, Context.MODE_PRIVATE);
+
+        if (sharedPref.contains(CITY)){
+            autoCompleteTextView.setText(sharedPref.getString(CITY, "city"));
+        }
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -238,6 +246,15 @@ public class MainActivity extends AppCompatActivity
         super.onCreateContextMenu(menu, v, menuInfo);
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.context_menu, menu);
+    }
+
+    @Override
+    protected void onDestroy() {
+//        sharedPref = getPreferences(MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(CITY, autoCompleteTextView.getText().toString());
+        editor.commit();
+        super.onDestroy();
     }
 
     @Override

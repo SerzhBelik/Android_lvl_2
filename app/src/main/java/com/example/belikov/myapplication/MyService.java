@@ -8,7 +8,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class MyService extends Service {
-    IBinder mBinder;      // Интерфейс связи с клиентом
+    private IBinder mBinder;      // Интерфейс связи с клиентом
     private Timer timer;
     private TimerTask tTask;
     private long interval = 10000;
