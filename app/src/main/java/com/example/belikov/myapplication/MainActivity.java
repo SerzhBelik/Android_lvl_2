@@ -34,8 +34,17 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.belikov.myapplication.interfaces.OpenWeather;
+import com.example.belikov.myapplication.model.WeatherRequest;
+
 import java.util.List;
 import java.util.Locale;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 import static android.hardware.Sensor.TYPE_AMBIENT_TEMPERATURE;
 import static android.hardware.Sensor.TYPE_RELATIVE_HUMIDITY;
@@ -50,13 +59,14 @@ public class MainActivity extends AppCompatActivity
     private Sensor humiditySensor;
     private BroadcastReceiver br;
     private SharedPreferences sharedPref;
+    private OpenWeather openWeather;
 
     private TextView temperTextView;
     private TextView humidTextView;
     private TextView windTextView;
     private TextView pressTextView;
     private EditText editTextYears;
-    private AutoCompleteTextView autoCompleteTextView;
+    private AutoCompleteTextView city;
 
     private static final String CELSIUS = " °C";
     private static final String FAHRENHEIT = " °F";
@@ -68,18 +78,72 @@ public class MainActivity extends AppCompatActivity
     public static final String PRESSURE = "press";
     public static final String YEARS = "years";
     public static final String CITY = "city";
+    private static final String API_KEY = "edfdd9d40eefbcf9979031dd4a5ff0c5";
 
     private boolean isCelsius = true;
 
     private float valueTemper;
+    private float valueWind;
+    private int valueHumidity;
+    private int valuePress;
     private int years;
 
-    private final String[]cities = {"Moscow", "S.Petersburg", "N.Novgorod", "Novosibirsk"};
+
+    private final String[]cities = {"Moscow", "S.Petersburg", "N.Novgorod", "Novosibirsk", "Saint Petersburg,ru"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        init();
+        initRetorfit();
+        requestRetrofit(city.getText().toString(), API_KEY);
+    }
+
+
+    private void initRetorfit(){
+        Retrofit retrofit;
+        retrofit = new Retrofit.Builder()
+// Базовая часть адреса
+                .baseUrl("http://api.openweathermap.org/")
+// Конвертер, необходимый для преобразования JSON в объекты
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+// Создаем объект, при помощи которого будем выполнять запросы
+        openWeather = retrofit.create(OpenWeather.class);
+    }
+
+    private void requestRetrofit(String city, String keyApi){
+        openWeather.loadWeather(city, keyApi)
+                .enqueue(new Callback<WeatherRequest>() {
+                    @Override
+                    public void onResponse(Call<WeatherRequest> call, Response<WeatherRequest> response) {
+                        if (response.body() != null)
+                            valueTemper = (float)((int)((response.body().getMain().getTemp() - 273)*10))/10;
+                            if (isCelsius)setCelsiusParam();
+                            else setFahrenParam();
+                        valueWind = response.body().getWind().getSpeed();
+                        valueHumidity = response.body().getMain().getHumidity();
+                        valuePress = response.body().getMain().getPressure();
+                        setParams();
+                    }
+
+                    @Override
+                    public void onFailure(Call<WeatherRequest> call, Throwable t) {
+                        temperTextView.setText("Error");
+                    }
+                });
+
+    }
+
+    private void setParams() {
+        windTextView.setText(getResources().getString(R.string.wind) + " " + valueWind + " mps");
+        humidTextView.setText(getResources().getString(R.string.humid) + " " + valueHumidity + " %");
+        pressTextView.setText(getResources().getString(R.string.press) + " " + valuePress + " hpa");
+    }
+
+    private void init() {
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -97,16 +161,16 @@ public class MainActivity extends AppCompatActivity
         humidTextView = findViewById(R.id.humidity);
         windTextView = findViewById(R.id.wind);
         pressTextView = findViewById(R.id.pressure);
-        editTextYears = findViewById(R.id.years_value);
-        autoCompleteTextView = findViewById(R.id.autoCompleteTextView);
+//        editTextYears = findViewById(R.id.years_value);
+        city = findViewById(R.id.autoCompleteTextView);
 
-        autoCompleteTextView.setAdapter(new ArrayAdapter<>(this,
+        city.setAdapter(new ArrayAdapter<>(this,
                 android.R.layout.simple_dropdown_item_1line, cities));
 
         sharedPref = getSharedPreferences(CITY, Context.MODE_PRIVATE);
 
         if (sharedPref.contains(CITY)){
-            autoCompleteTextView.setText(sharedPref.getString(CITY, "city"));
+            city.setText(sharedPref.getString(CITY, "city"));
         }
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -131,8 +195,8 @@ public class MainActivity extends AppCompatActivity
             // действия при получении сообщений
             public void onReceive(Context context, Intent intent) {
                 //FIXME
-                valueTemper = intent.getIntExtra(TEMPER,0);
-                setParams(intent);
+//                valueTemper = intent.getIntExtra(TEMPER,0);
+//                setParams(intent);
             }
         };
         // создаем фильтр для BroadcastReceiver
@@ -147,20 +211,24 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 //FIXME
-                years = Integer.parseInt(editTextYears.getText().toString());
-                Intent intent = new Intent(MainActivity.this, SecondActivity.class);
-                intent.putExtra(YEARS, years);
-                startActivity(intent);
+                requestRetrofit(city.getText().toString(), API_KEY);
             }
         });
+
     }
 
-    private void setParams(Intent intent) {
-        showTemper();
-        showHumid(intent);
-        showWind(intent);
-        showPress(intent);
-    }
+//    private void request(){
+//                requestRetrofit(city.getText().toString(), API_KEY);
+//    }
+
+
+
+//    private void setParams(Intent intent) {
+//        showTemper();
+//        showHumid(intent);
+//        showWind(intent);
+//        showPress(intent);
+//    }
 
 
     @Override
@@ -250,9 +318,8 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
-//        sharedPref = getPreferences(MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString(CITY, autoCompleteTextView.getText().toString());
+        editor.putString(CITY, city.getText().toString());
         editor.commit();
         super.onDestroy();
     }
