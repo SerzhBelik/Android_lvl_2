@@ -13,19 +13,21 @@
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
     <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription="@string/nav_header_desc"
-        android:paddingTop="@dimen/nav_header_vertical_spacing"
-        android:onClick="onAvatarClick"
-        app:srcCompat="@mipmap/avatar1" />
+    android:id="@+id/imageView"
+    android:layout_width="180dp"
+    android:layout_height="100dp"
+    android:contentDescription="@string/nav_header_desc"
+    android:paddingTop="@dimen/nav_header_vertical_spacing"
+    android:onClick="onAvatarClick"
+    />
 
     <TextView
+        android:id="@+id/city_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="@dimen/nav_header_vertical_spacing"
-        android:text="@string/nav_header_title"
+        android:layout_marginStart="16dp"
+        android:text="City"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
     <!--<TextView-->

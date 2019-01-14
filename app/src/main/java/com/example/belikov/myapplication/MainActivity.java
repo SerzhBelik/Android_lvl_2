@@ -31,12 +31,15 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.belikov.myapplication.interfaces.OpenWeather;
 import com.example.belikov.myapplication.model.WeatherRequest;
+import com.squareup.picasso.Picasso;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -65,8 +68,8 @@ public class MainActivity extends AppCompatActivity
     private TextView humidTextView;
     private TextView windTextView;
     private TextView pressTextView;
-    private EditText editTextYears;
     private AutoCompleteTextView city;
+    private ImageView imageView;
 
     private static final String CELSIUS = " °C";
     private static final String FAHRENHEIT = " °F";
@@ -86,10 +89,14 @@ public class MainActivity extends AppCompatActivity
     private float valueWind;
     private int valueHumidity;
     private int valuePress;
-    private int years;
 
-
-    private final String[]cities = {"Moscow", "S.Petersburg", "N.Novgorod", "Novosibirsk", "Saint Petersburg,ru"};
+    private final String[] cities = {"Moscow", "Novosibirsk", "Saint Petersburg,ru", "Nizhniy Novgorod", "Vladivostok"};
+    private final String[] citiesImages = {"https://www.rgo.ru/sites/default/files/styles/full_view/public/20.02.2014_ilya_melnikov_moskva_0.jpg?itok=CZ--BHfl",
+                                            " https://avatars.mds.yandex.net/get-pdb/812271/9d5c0197-6b9d-499e-b4fd-14f9964e0fe4/s1200",
+                                            "https://cdn24.img.ria.ru/images/42278/81/422788117_0:0:600:340_600x0_80_0_0_8c05ee6cd03dcd9c5fa5073111f49514.jpg",
+                                            "https://nashaplaneta.net/europe/russia/img_nizhny/kreml-nizhniy_mini.jpg",
+                                            "https://img-fotki.yandex.ru/get/467152/30348152.234/0_9311f_52ade03c_orig"};
+    private HashMap<String, String> citiesMap= new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -161,9 +168,13 @@ public class MainActivity extends AppCompatActivity
         humidTextView = findViewById(R.id.humidity);
         windTextView = findViewById(R.id.wind);
         pressTextView = findViewById(R.id.pressure);
-//        editTextYears = findViewById(R.id.years_value);
-        city = findViewById(R.id.autoCompleteTextView);
 
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+// Наполняем шапку элементами
+        View headerLayout = navigationView.getHeaderView(0);
+        imageView = headerLayout.findViewById(R.id.imageView);
+        imageView.setImageResource(R.drawable.pogoda);
+        city = findViewById(R.id.autoCompleteTextView);
         city.setAdapter(new ArrayAdapter<>(this,
                 android.R.layout.simple_dropdown_item_1line, cities));
 
@@ -188,7 +199,6 @@ public class MainActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         br = new BroadcastReceiver() {
@@ -212,10 +222,34 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View v) {
                 //FIXME
                 requestRetrofit(city.getText().toString(), API_KEY);
+                setImageView();
             }
         });
 
+        for (int i = 0; i < cities.length; i++){
+            citiesMap.put(cities[i], citiesImages[i]);
+        }
+
+        setImageView();
+
     }
+
+    private void setImageView() {
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        View headerLayout = navigationView.getHeaderView(0);
+        imageView = headerLayout.findViewById(R.id.imageView);
+        ImageView imageTest = findViewById(R.id.imageTest);
+        String currentCity = city.getText().toString();
+        TextView cityName = headerLayout.findViewById(R.id.city_name);
+        cityName.setText(currentCity);
+        Toast.makeText(this, currentCity, Toast.LENGTH_SHORT).show();
+        String path = citiesMap.get(currentCity);
+        Picasso
+                .with(this)
+                .load(path)
+                .into(imageView);
+    }
+
 
 //    private void request(){
 //                requestRetrofit(city.getText().toString(), API_KEY);
@@ -364,8 +398,8 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         public void onSensorChanged(SensorEvent event) {
-            valueTemper = event.values[0];
-            showTemper();
+//            valueTemper = event.values[0];
+//            showTemper();
         }
     };
 
@@ -377,7 +411,7 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         public void onSensorChanged(SensorEvent event) {
-            showHumidSensors(event);
+//            showHumidSensors(event);
         }
     };
 
@@ -392,17 +426,6 @@ public class MainActivity extends AppCompatActivity
         humidTextView.setText(humidTextView.getText().toString() + " " + event.values[0] + PERCENT);
     }
 
-    private void showHumid(Intent intent){
-        humidTextView.setText(getResources().getString(R.string.humid) + " " + intent.getIntExtra(HUMIDITY, 0) + PERCENT);
-    }
-
-    private void showWind(Intent intent) {
-        windTextView.setText(getResources().getString(R.string.wind) + " " + intent.getFloatExtra(WIND, 0));
-    }
-
-    private void showPress(Intent intent) {
-        pressTextView.setText(getResources().getString(R.string.press) + " " + intent.getIntExtra(PRESSURE, 0));
-    }
 
     private void setCelsiusParam(){
         temperTextView.setText(getResources().getString(R.string.temper) + " " + valueTemper + CELSIUS);
