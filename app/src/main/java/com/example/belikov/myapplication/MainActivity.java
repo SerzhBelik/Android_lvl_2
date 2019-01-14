@@ -179,12 +179,14 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        mapInit();
+        setImageView();
+    }
+
+    private void mapInit(){
         for (int i = 0; i < cities.length; i++){
             citiesMap.put(cities[i], citiesImages[i]);
         }
-
-        setImageView();
-
     }
 
     private void setImageView() {
