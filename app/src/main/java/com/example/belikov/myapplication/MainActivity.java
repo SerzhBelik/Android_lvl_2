@@ -1,21 +1,12 @@
 package com.example.belikov.myapplication;
 
-import android.app.FragmentManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.widget.CardView;
 import android.view.ContextMenu;
 import android.view.MenuInflater;
 import android.view.View;
@@ -30,37 +21,25 @@ import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.example.belikov.myapplication.interfaces.OpenWeather;
 import com.example.belikov.myapplication.model.WeatherRequest;
 import com.squareup.picasso.Picasso;
-
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-import static android.hardware.Sensor.TYPE_AMBIENT_TEMPERATURE;
-import static android.hardware.Sensor.TYPE_RELATIVE_HUMIDITY;
-
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private Locale locale;
 
-    private SensorManager sensorManager;
-    private Sensor temperatureSensor;
-    private Sensor humiditySensor;
-    private BroadcastReceiver br;
     private SharedPreferences sharedPref;
     private OpenWeather openWeather;
 
@@ -70,16 +49,12 @@ public class MainActivity extends AppCompatActivity
     private TextView pressTextView;
     private AutoCompleteTextView city;
     private ImageView imageView;
+    private TextView cityName;
+    private NavigationView navigationView;
+    private View headerLayout;
 
     private static final String CELSIUS = " °C";
     private static final String FAHRENHEIT = " °F";
-    private static final String PERCENT = " %";
-    public final static String BROADCAST_ACTION = "com.example.belikov.myapplication";
-    public static final String TEMPER = "temperature";
-    public static final String WIND = "wind";
-    public static final String HUMIDITY = "humid";
-    public static final String PRESSURE = "press";
-    public static final String YEARS = "years";
     public static final String CITY = "city";
     private static final String API_KEY = "edfdd9d40eefbcf9979031dd4a5ff0c5";
 
@@ -92,7 +67,7 @@ public class MainActivity extends AppCompatActivity
 
     private final String[] cities = {"Moscow", "Novosibirsk", "Saint Petersburg,ru", "Nizhniy Novgorod", "Vladivostok"};
     private final String[] citiesImages = {"https://www.rgo.ru/sites/default/files/styles/full_view/public/20.02.2014_ilya_melnikov_moskva_0.jpg?itok=CZ--BHfl",
-                                            " https://avatars.mds.yandex.net/get-pdb/812271/9d5c0197-6b9d-499e-b4fd-14f9964e0fe4/s1200",
+                                            "https://avatars.mds.yandex.net/get-pdb/812271/9d5c0197-6b9d-499e-b4fd-14f9964e0fe4/s1200",
                                             "https://cdn24.img.ria.ru/images/42278/81/422788117_0:0:600:340_600x0_80_0_0_8c05ee6cd03dcd9c5fa5073111f49514.jpg",
                                             "https://nashaplaneta.net/europe/russia/img_nizhny/kreml-nizhniy_mini.jpg",
                                             "https://img-fotki.yandex.ru/get/467152/30348152.234/0_9311f_52ade03c_orig"};
@@ -138,6 +113,9 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void onFailure(Call<WeatherRequest> call, Throwable t) {
                         temperTextView.setText("Error");
+                        windTextView.setText("Error");
+                        humidTextView.setText("Error");
+                        pressTextView.setText("Error");
                     }
                 });
 
@@ -153,27 +131,17 @@ public class MainActivity extends AppCompatActivity
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-
-        temperatureSensor = sensorManager.getDefaultSensor(TYPE_AMBIENT_TEMPERATURE);
-        humiditySensor = sensorManager.getDefaultSensor(TYPE_RELATIVE_HUMIDITY);
-
-        sensorManager.registerListener(listenerTemper, temperatureSensor,
-                SensorManager.SENSOR_DELAY_NORMAL);
-        sensorManager.registerListener(listenerHumid, humiditySensor,
-                SensorManager.SENSOR_DELAY_NORMAL);
-
 
         temperTextView = findViewById(R.id.temperature);
         humidTextView = findViewById(R.id.humidity);
         windTextView = findViewById(R.id.wind);
         pressTextView = findViewById(R.id.pressure);
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-// Наполняем шапку элементами
-        View headerLayout = navigationView.getHeaderView(0);
+        navigationView = findViewById(R.id.nav_view);
+        headerLayout = navigationView.getHeaderView(0);
         imageView = headerLayout.findViewById(R.id.imageView);
         imageView.setImageResource(R.drawable.pogoda);
+        cityName = headerLayout.findViewById(R.id.city_name);
         city = findViewById(R.id.autoCompleteTextView);
         city.setAdapter(new ArrayAdapter<>(this,
                 android.R.layout.simple_dropdown_item_1line, cities));
@@ -184,7 +152,7 @@ public class MainActivity extends AppCompatActivity
             city.setText(sharedPref.getString(CITY, "city"));
         }
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -193,7 +161,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
@@ -201,26 +169,11 @@ public class MainActivity extends AppCompatActivity
 
         navigationView.setNavigationItemSelectedListener(this);
 
-        br = new BroadcastReceiver() {
-            // действия при получении сообщений
-            public void onReceive(Context context, Intent intent) {
-                //FIXME
-//                valueTemper = intent.getIntExtra(TEMPER,0);
-//                setParams(intent);
-            }
-        };
-        // создаем фильтр для BroadcastReceiver
-        IntentFilter intFilt = new IntentFilter(BROADCAST_ACTION);
-        // регистрируем (включаем) BroadcastReceiver
-        registerReceiver(br, intFilt);
-
-        startService(new Intent(MainActivity.this, MyService.class));
 
         Button ok = findViewById(R.id.ok);
         ok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //FIXME
                 requestRetrofit(city.getText().toString(), API_KEY);
                 setImageView();
             }
@@ -235,14 +188,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void setImageView() {
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        View headerLayout = navigationView.getHeaderView(0);
-        imageView = headerLayout.findViewById(R.id.imageView);
-        ImageView imageTest = findViewById(R.id.imageTest);
         String currentCity = city.getText().toString();
-        TextView cityName = headerLayout.findViewById(R.id.city_name);
         cityName.setText(currentCity);
-        Toast.makeText(this, currentCity, Toast.LENGTH_SHORT).show();
         String path = citiesMap.get(currentCity);
         Picasso
                 .with(this)
@@ -250,31 +197,14 @@ public class MainActivity extends AppCompatActivity
                 .into(imageView);
     }
 
-
-//    private void request(){
-//                requestRetrofit(city.getText().toString(), API_KEY);
-//    }
-
-
-
-//    private void setParams(Intent intent) {
-//        showTemper();
-//        showHumid(intent);
-//        showWind(intent);
-//        showPress(intent);
-//    }
-
-
     @Override
     protected void onPause() {
         super.onPause();
-        sensorManager.unregisterListener(listenerTemper, temperatureSensor);
-        sensorManager.unregisterListener(listenerHumid, humiditySensor);
     }
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -292,13 +222,6 @@ public class MainActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
 
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.find_city) {
-            Toast.makeText(this, "find_city", Toast.LENGTH_SHORT).show();
-            findCity();
-            return true;
-        }
 
         if (id == R.id.lang) {
             Toast.makeText(this, "lang", Toast.LENGTH_SHORT).show();
@@ -338,7 +261,7 @@ public class MainActivity extends AppCompatActivity
 
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -368,16 +291,6 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    public void onAvatarClick(View view){
-        Toast.makeText(this, "avatar", Toast.LENGTH_SHORT).show();
-        setAnAvatar();
-        //FIXME
-    }
-
-    private void setAnAvatar() {
-        //FIXME
-    }
-
     private void setLocale(String lang){
         locale = new Locale(lang);
         Locale.setDefault(locale);
@@ -386,53 +299,12 @@ public class MainActivity extends AppCompatActivity
         getBaseContext().getResources().updateConfiguration(configuration, null);
     }
 
-    private void findCity() {
-        //FIXME
-    }
-
-    SensorEventListener listenerTemper = new SensorEventListener() {
-
-        @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        }
-
-        @Override
-        public void onSensorChanged(SensorEvent event) {
-//            valueTemper = event.values[0];
-//            showTemper();
-        }
-    };
-
-    SensorEventListener listenerHumid = new SensorEventListener() {
-
-        @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        }
-
-        @Override
-        public void onSensorChanged(SensorEvent event) {
-//            showHumidSensors(event);
-        }
-    };
-
-    private void showTemper(){
-        if (isCelsius){
-            setCelsiusParam();
-        } else setFahrenParam();
-
-    }
-
-    private void showHumidSensors(SensorEvent event){
-        humidTextView.setText(humidTextView.getText().toString() + " " + event.values[0] + PERCENT);
-    }
-
-
     private void setCelsiusParam(){
         temperTextView.setText(getResources().getString(R.string.temper) + " " + valueTemper + CELSIUS);
     }
 
     private void setFahrenParam(){
-        temperTextView.setText(getResources().getString(R.string.temper) + " " + ((valueTemper*9/5+32)) + FAHRENHEIT);
+        temperTextView.setText(getResources().getString(R.string.temper) + " " + ((float)((int)(((valueTemper*9/5+32))*10))/10) + FAHRENHEIT);
     }
 
 
