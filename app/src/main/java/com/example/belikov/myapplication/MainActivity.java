@@ -24,18 +24,12 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.example.belikov.myapplication.DBTools.WeatherDataReader;
 import com.example.belikov.myapplication.DBTools.WeatherDataSource;
 import com.example.belikov.myapplication.DBTools.WeatherNote;
 import com.example.belikov.myapplication.interfaces.OpenWeather;
-import com.example.belikov.myapplication.model.City;
 import com.example.belikov.myapplication.model.WeatherRequest;
-import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
-import org.json.JSONArray;
-import org.json.JSONException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import retrofit2.Call;
@@ -86,8 +80,6 @@ public class MainActivity extends AppCompatActivity
                                             "https://nashaplaneta.net/europe/russia/img_nizhny/kreml-nizhniy_mini.jpg",
                                             "https://img-fotki.yandex.ru/get/467152/30348152.234/0_9311f_52ade03c_orig"};
     private HashMap<String, String> citiesMap= new HashMap<>();
-
-    private int count;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -151,11 +143,13 @@ public class MainActivity extends AppCompatActivity
         noteDataReader.open(currentCity);
 
         if (noteDataReader.getPosition(0) == null) {
-            noteDataReader.close();
-            noteDataReader.open();
+//            noteDataReader.close();
+//            noteDataReader.open();
+            Toast.makeText(MainActivity.this, "Add to DB", Toast.LENGTH_SHORT).show();
             notesDataSource.addNote(currentCity, valueTemper, valueWind, valueHumidity, valuePress);
         } else {
             notesDataSource.editNote(noteDataReader.getPosition(0),currentCity, valueTemper, valueWind, valueHumidity, valuePress);
+            Toast.makeText(MainActivity.this, "Edit DB", Toast.LENGTH_SHORT).show();
         }
         noteDataReader.close();
     }
