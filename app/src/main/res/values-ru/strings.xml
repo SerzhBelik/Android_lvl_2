@@ -19,5 +19,13 @@
     <string name="wind_val">3 м/с</string>
     <string name="humid_val"> 755 мм рт. ст.</string>
     <string name="for_ten_days">За десять дней</string>
+    <string name="current_param">Текущие параметры</string>
+    <string name="temper">Температура:</string>
+    <string name="humid">Влажность:</string>
+    <string name="wind">Ветер:</string>
+    <string name="press">Давление:</string>
+    <string name="ok">OK</string>
+    <string name="avg">Расчитать среднюю температуру за</string>
+    <string name="years">год(а) (лет)</string>
 
 </resources>

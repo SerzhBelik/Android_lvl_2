@@ -1,11 +1,12 @@
 package com.example.belikov.myapplication;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v7.widget.CardView;
 import android.view.ContextMenu;
 import android.view.MenuInflater;
 import android.view.View;
@@ -17,31 +18,178 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
-
+import com.example.belikov.myapplication.DBTools.WeatherDataReader;
+import com.example.belikov.myapplication.DBTools.WeatherDataSource;
+import com.example.belikov.myapplication.DBTools.WeatherNote;
+import com.example.belikov.myapplication.interfaces.OpenWeather;
+import com.example.belikov.myapplication.model.WeatherRequest;
+import com.squareup.picasso.Picasso;
+import java.util.HashMap;
 import java.util.Locale;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private Locale locale;
 
+    private SharedPreferences sharedPref;
+    private OpenWeather openWeather;
+
+    private TextView temperTextView;
+    private TextView humidTextView;
+    private TextView windTextView;
+    private TextView pressTextView;
+    private AutoCompleteTextView city;
+    private ImageView imageView;
+    private TextView cityName;
+    private NavigationView navigationView;
+    private View headerLayout;
+
+    private static final String CELSIUS = " °C";
+    private static final String FAHRENHEIT = " °F";
+    public static final String CITY = "city";
+    private static final String API_KEY = "edfdd9d40eefbcf9979031dd4a5ff0c5";
+    private String currentCity;
+
+    private boolean isCelsius = true;
+
+    private float valueTemper;
+    private float valueWind;
+    private int valueHumidity;
+    private int valuePress;
+
+    private WeatherDataSource notesDataSource;     // Источник данных
+    private WeatherDataReader noteDataReader;      // Читатель данных
+
+
+    private final String[] cities = {"Moscow", "Novosibirsk", "Saint Petersburg,ru", "Nizhniy Novgorod", "Vladivostok"};
+    private final String[] citiesImages = {"https://www.rgo.ru/sites/default/files/styles/full_view/public/20.02.2014_ilya_melnikov_moskva_0.jpg?itok=CZ--BHfl",
+                                            "https://avatars.mds.yandex.net/get-pdb/812271/9d5c0197-6b9d-499e-b4fd-14f9964e0fe4/s1200",
+                                            "https://cdn24.img.ria.ru/images/42278/81/422788117_0:0:600:340_600x0_80_0_0_8c05ee6cd03dcd9c5fa5073111f49514.jpg",
+                                            "https://nashaplaneta.net/europe/russia/img_nizhny/kreml-nizhniy_mini.jpg",
+                                            "https://img-fotki.yandex.ru/get/467152/30348152.234/0_9311f_52ade03c_orig"};
+    private HashMap<String, String> citiesMap= new HashMap<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        init();
+        initDataSource();
+        initRetorfit();
+        requestRetrofit(currentCity, API_KEY);
+
+    }
+
+    private void initDataSource(){
+        notesDataSource = new WeatherDataSource(getApplicationContext());
+        notesDataSource.open();
+        noteDataReader = notesDataSource.getNoteDataReader();
+    }
+
+
+    private void initRetorfit(){
+        Retrofit retrofit;
+        retrofit = new Retrofit.Builder()
+// Базовая часть адреса
+                .baseUrl("http://api.openweathermap.org/")
+// Конвертер, необходимый для преобразования JSON в объекты
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+// Создаем объект, при помощи которого будем выполнять запросы
+        openWeather = retrofit.create(OpenWeather.class);
+    }
+
+    private void requestRetrofit(String city, String keyApi){
+        openWeather.loadWeather(city, keyApi)
+                .enqueue(new Callback<WeatherRequest>() {
+                    @Override
+                    public void onResponse(Call<WeatherRequest> call, Response<WeatherRequest> response) {
+                        if (response.body() != null)
+                            valueTemper = (float)((int)((response.body().getMain().getTemp() - 273)*10))/10;
+
+                        valueWind = response.body().getWind().getSpeed();
+                        valueHumidity = response.body().getMain().getHumidity();
+                        valuePress = response.body().getMain().getPressure();
+                        setParams();
+
+                        addOrUpdate();
+
+                    }
+
+                    @Override
+                    public void onFailure(Call<WeatherRequest> call, Throwable t) {
+                        temperTextView.setText(getResources().getString(R.string.temper) + " " + "Error");
+                         windTextView.setText(getResources().getString(R.string.wind) + " " + "Error");
+                        humidTextView.setText(getResources().getString(R.string.humid) + " " + "Error");
+                        pressTextView.setText(getResources().getString(R.string.press) + " " +"Error");
+                    }
+                });
+
+    }
+
+    private void addOrUpdate() {
+        noteDataReader.open(currentCity);
+
+        if (noteDataReader.getPosition(0) == null) {
+//            noteDataReader.close();
+//            noteDataReader.open();
+            Toast.makeText(MainActivity.this, "Add to DB", Toast.LENGTH_SHORT).show();
+            notesDataSource.addNote(currentCity, valueTemper, valueWind, valueHumidity, valuePress);
+        } else {
+            notesDataSource.editNote(noteDataReader.getPosition(0),currentCity, valueTemper, valueWind, valueHumidity, valuePress);
+            Toast.makeText(MainActivity.this, "Edit DB", Toast.LENGTH_SHORT).show();
+        }
+        noteDataReader.close();
+    }
+
+    private void setParams() {
+        if (isCelsius)setCelsiusParam();
+        else setFahrenParam();
+         windTextView.setText(getResources().getString(R.string.wind) + " " + valueWind + " mps");
+        humidTextView.setText(getResources().getString(R.string.humid) + " " + valueHumidity + " %");
+        pressTextView.setText(getResources().getString(R.string.press) + " " + valuePress + " hpa");
+    }
+
+    private void init() {
+        currentCity = "Moscow";
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        CardView cardView1 = findViewById(R.id.cardView1);
-        CardView cardView2 = findViewById(R.id.cardView2);
-        CardView cardView3 = findViewById(R.id.cardView3);
+        temperTextView = findViewById(R.id.temperature);
+        humidTextView = findViewById(R.id.humidity);
+        windTextView = findViewById(R.id.wind);
+        pressTextView = findViewById(R.id.pressure);
 
-        registerForContextMenu(cardView1);
-        registerForContextMenu(cardView2);
-        registerForContextMenu(cardView3);
+        navigationView = findViewById(R.id.nav_view);
+        headerLayout = navigationView.getHeaderView(0);
+        imageView = headerLayout.findViewById(R.id.imageView);
+        imageView.setImageResource(R.drawable.pogoda);
+        cityName = headerLayout.findViewById(R.id.city_name);
+        city = findViewById(R.id.autoCompleteTextView);
+        city.setAdapter(new ArrayAdapter<>(this,
+                android.R.layout.simple_dropdown_item_1line, cities));
+        city.setText(currentCity);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        sharedPref = getSharedPreferences(CITY, Context.MODE_PRIVATE);
+
+        if (sharedPref.contains(CITY)){
+            city.setText(sharedPref.getString(CITY, "city"));
+        }
+
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -50,19 +198,72 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+
+        Button ok = findViewById(R.id.ok);
+        ok.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                currentCity = city.getText().toString();
+                noteDataReader.open(currentCity);
+                WeatherNote note = noteDataReader.getPosition(0);
+                if (note != null) {
+                    Toast.makeText(MainActivity.this, "get from DB", Toast.LENGTH_SHORT).show();
+                    getParamFromDB(note);
+                }else {
+                    requestRetrofit(currentCity, API_KEY);
+                    Toast.makeText(MainActivity.this, "get from internet", Toast.LENGTH_SHORT).show();
+                }
+
+                setImageView();
+
+            }
+        });
+
+        mapInit();
+        setImageView();
+    }
+
+    private void getParamFromDB(WeatherNote note) {
+        Toast.makeText(MainActivity.this, note.getCityName(), Toast.LENGTH_SHORT).show();
+            valueTemper = note.getTemper();
+            valueWind = note.getWind();
+            valueHumidity = note.getHumidity();
+            valuePress = note.getPress();
+            setParams();
+    }
+
+    private void mapInit(){
+        for (int i = 0; i < cities.length; i++){
+            citiesMap.put(cities[i], citiesImages[i]);
+        }
+    }
+
+    private void setImageView() {
+        currentCity = city.getText().toString();
+        cityName.setText(currentCity);
+        String path = citiesMap.get(currentCity);
+        Picasso
+                .with(this)
+                .load(path)
+                .into(imageView);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
     }
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -80,13 +281,6 @@ public class MainActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
 
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.find_city) {
-            Toast.makeText(this, "find_city", Toast.LENGTH_SHORT).show();
-            findCity();
-            return true;
-        }
 
         if (id == R.id.lang) {
             Toast.makeText(this, "lang", Toast.LENGTH_SHORT).show();
@@ -109,9 +303,13 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.celsius) {
+            isCelsius = true;
+            setCelsiusParam();
             Toast.makeText(this, "celsius", Toast.LENGTH_SHORT).show();
 
         } else if (id == R.id.fahrenheit) {
+            isCelsius = false;
+            setFahrenParam();
             Toast.makeText(this, "fahrenheit", Toast.LENGTH_SHORT).show();
 
         } else if (id == R.id.about_dev) {
@@ -122,7 +320,7 @@ public class MainActivity extends AppCompatActivity
 
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -135,6 +333,14 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onDestroy() {
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(CITY, city.getText().toString());
+        editor.commit();
+        super.onDestroy();
+    }
+
+    @Override
     public boolean onContextItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.for_ten_days){
             Toast.makeText(this, "create a new fragment", Toast.LENGTH_SHORT).show();
@@ -142,16 +348,6 @@ public class MainActivity extends AppCompatActivity
 
         }
         return true;
-    }
-
-    public void onAvatarClick(View view){
-        Toast.makeText(this, "avatar", Toast.LENGTH_SHORT).show();
-        setAnAvatar();
-        //FIXME
-    }
-
-    private void setAnAvatar() {
-        //FIXME
     }
 
     private void setLocale(String lang){
@@ -162,7 +358,16 @@ public class MainActivity extends AppCompatActivity
         getBaseContext().getResources().updateConfiguration(configuration, null);
     }
 
-    private void findCity() {
-        //FIXME
+    private void setCelsiusParam(){
+        temperTextView.setText(getResources().getString(R.string.temper) + " " + valueTemper + CELSIUS);
     }
+
+    private void setFahrenParam(){
+        temperTextView.setText(getResources().getString(R.string.temper) + " " + ((float)((int)(((valueTemper*9/5+32))*10))/10) + FAHRENHEIT);
+    }
+
+
+
 }
+
+
