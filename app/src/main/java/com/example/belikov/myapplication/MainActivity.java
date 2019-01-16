@@ -27,6 +27,7 @@ import android.widget.Toast;
 
 import com.example.belikov.myapplication.DBTools.WeatherDataReader;
 import com.example.belikov.myapplication.DBTools.WeatherDataSource;
+import com.example.belikov.myapplication.DBTools.WeatherNote;
 import com.example.belikov.myapplication.interfaces.OpenWeather;
 import com.example.belikov.myapplication.model.City;
 import com.example.belikov.myapplication.model.WeatherRequest;
@@ -65,7 +66,7 @@ public class MainActivity extends AppCompatActivity
     private static final String FAHRENHEIT = " °F";
     public static final String CITY = "city";
     private static final String API_KEY = "edfdd9d40eefbcf9979031dd4a5ff0c5";
-    private String currentCity = "Moscow";
+    private String currentCity;
 
     private boolean isCelsius = true;
 
@@ -85,6 +86,8 @@ public class MainActivity extends AppCompatActivity
                                             "https://nashaplaneta.net/europe/russia/img_nizhny/kreml-nizhniy_mini.jpg",
                                             "https://img-fotki.yandex.ru/get/467152/30348152.234/0_9311f_52ade03c_orig"};
     private HashMap<String, String> citiesMap= new HashMap<>();
+
+    private int count;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,21 +126,13 @@ public class MainActivity extends AppCompatActivity
                     public void onResponse(Call<WeatherRequest> call, Response<WeatherRequest> response) {
                         if (response.body() != null)
                             valueTemper = (float)((int)((response.body().getMain().getTemp() - 273)*10))/10;
-                            if (isCelsius)setCelsiusParam();
-                            else setFahrenParam();
+
                         valueWind = response.body().getWind().getSpeed();
                         valueHumidity = response.body().getMain().getHumidity();
                         valuePress = response.body().getMain().getPressure();
                         setParams();
 
-                        noteDataReader.open(currentCity);
-                        if (noteDataReader.getPosition(0) == null) {
-                            notesDataSource.addNote(currentCity, valueTemper, valueWind, valueHumidity, valuePress);
-                            int i = noteDataReader.getCount();
-                            Toast.makeText(MainActivity.this, "getCount() " + i, Toast.LENGTH_SHORT).show();
-                        } else {
-                            notesDataSource.editNote(noteDataReader.getPosition(0),currentCity, valueTemper, valueWind, valueHumidity, valuePress);
-                        }
+                        addOrUpdate();
 
                     }
 
@@ -152,13 +147,29 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    private void addOrUpdate() {
+        noteDataReader.open(currentCity);
+
+        if (noteDataReader.getPosition(0) == null) {
+            noteDataReader.close();
+            noteDataReader.open();
+            notesDataSource.addNote(currentCity, valueTemper, valueWind, valueHumidity, valuePress);
+        } else {
+            notesDataSource.editNote(noteDataReader.getPosition(0),currentCity, valueTemper, valueWind, valueHumidity, valuePress);
+        }
+        noteDataReader.close();
+    }
+
     private void setParams() {
+        if (isCelsius)setCelsiusParam();
+        else setFahrenParam();
          windTextView.setText(getResources().getString(R.string.wind) + " " + valueWind + " mps");
         humidTextView.setText(getResources().getString(R.string.humid) + " " + valueHumidity + " %");
         pressTextView.setText(getResources().getString(R.string.press) + " " + valuePress + " hpa");
     }
 
     private void init() {
+        currentCity = "Moscow";
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -176,6 +187,7 @@ public class MainActivity extends AppCompatActivity
         city = findViewById(R.id.autoCompleteTextView);
         city.setAdapter(new ArrayAdapter<>(this,
                 android.R.layout.simple_dropdown_item_1line, cities));
+        city.setText(currentCity);
 
         sharedPref = getSharedPreferences(CITY, Context.MODE_PRIVATE);
 
@@ -205,13 +217,33 @@ public class MainActivity extends AppCompatActivity
         ok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                requestRetrofit(city.getText().toString(), API_KEY);
+                currentCity = city.getText().toString();
+                noteDataReader.open(currentCity);
+                WeatherNote note = noteDataReader.getPosition(0);
+                if (note != null) {
+                    Toast.makeText(MainActivity.this, "get from DB", Toast.LENGTH_SHORT).show();
+                    getParamFromDB(note);
+                }else {
+                    requestRetrofit(currentCity, API_KEY);
+                    Toast.makeText(MainActivity.this, "get from internet", Toast.LENGTH_SHORT).show();
+                }
+
                 setImageView();
+
             }
         });
 
         mapInit();
         setImageView();
+    }
+
+    private void getParamFromDB(WeatherNote note) {
+        Toast.makeText(MainActivity.this, note.getCityName(), Toast.LENGTH_SHORT).show();
+            valueTemper = note.getTemper();
+            valueWind = note.getWind();
+            valueHumidity = note.getHumidity();
+            valuePress = note.getPress();
+            setParams();
     }
 
     private void mapInit(){
