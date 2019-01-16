@@ -25,8 +25,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.example.belikov.myapplication.interfaces.OpenWeather;
+import com.example.belikov.myapplication.model.City;
 import com.example.belikov.myapplication.model.WeatherRequest;
+import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
+import org.json.JSONArray;
+import org.json.JSONException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import retrofit2.Call;
@@ -57,6 +62,7 @@ public class MainActivity extends AppCompatActivity
     private static final String FAHRENHEIT = " °F";
     public static final String CITY = "city";
     private static final String API_KEY = "edfdd9d40eefbcf9979031dd4a5ff0c5";
+    private String currentCity = "Moscow";
 
     private boolean isCelsius = true;
 
@@ -79,9 +85,9 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         init();
         initRetorfit();
-        requestRetrofit(city.getText().toString(), API_KEY);
-    }
+        requestRetrofit(currentCity, API_KEY);
 
+    }
 
     private void initRetorfit(){
         Retrofit retrofit;
@@ -112,17 +118,17 @@ public class MainActivity extends AppCompatActivity
 
                     @Override
                     public void onFailure(Call<WeatherRequest> call, Throwable t) {
-                        temperTextView.setText("Error");
-                        windTextView.setText("Error");
-                        humidTextView.setText("Error");
-                        pressTextView.setText("Error");
+                        temperTextView.setText(getResources().getString(R.string.temper) + " " + "Error");
+                         windTextView.setText(getResources().getString(R.string.wind) + " " + "Error");
+                        humidTextView.setText(getResources().getString(R.string.humid) + " " + "Error");
+                        pressTextView.setText(getResources().getString(R.string.press) + " " +"Error");
                     }
                 });
 
     }
 
     private void setParams() {
-        windTextView.setText(getResources().getString(R.string.wind) + " " + valueWind + " mps");
+         windTextView.setText(getResources().getString(R.string.wind) + " " + valueWind + " mps");
         humidTextView.setText(getResources().getString(R.string.humid) + " " + valueHumidity + " %");
         pressTextView.setText(getResources().getString(R.string.press) + " " + valuePress + " hpa");
     }
@@ -190,7 +196,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void setImageView() {
-        String currentCity = city.getText().toString();
+        currentCity = city.getText().toString();
         cityName.setText(currentCity);
         String path = citiesMap.get(currentCity);
         Picasso
