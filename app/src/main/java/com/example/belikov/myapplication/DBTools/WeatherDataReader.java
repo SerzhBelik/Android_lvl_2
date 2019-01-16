@@ -26,6 +26,11 @@ public class WeatherDataReader implements Closeable {
     }
 
     // Подготовить к чтению таблицу
+    public void open(String city){
+        query(city);
+        cursor.moveToFirst();
+    }
+
     public void open(){
         query();
         cursor.moveToFirst();
@@ -36,13 +41,18 @@ public class WeatherDataReader implements Closeable {
     }
 
     // Перечитать таблицу (если точно – обновить курсор)
-    public void Refresh(){
+    public void Refresh(String city){
         int position = cursor.getPosition();
-        query();
+        query(city);
         cursor.moveToPosition(position);
     }
 
     // Создание запроса на курсор
+    private void query(String city){
+        cursor = database.query(DatabaseHelper.TABLE_NOTES,
+                notesAllColumn, "city_name = " + "'" + city + "'", null, null, null, null);
+    }
+
     private void query(){
         cursor = database.query(DatabaseHelper.TABLE_NOTES,
                 notesAllColumn, null, null, null, null, null);
@@ -62,6 +72,7 @@ public class WeatherDataReader implements Closeable {
     // Преобразователь данных курсора в объект
     private WeatherNote cursorToNote() {
         WeatherNote note = new WeatherNote();
+        if (getCount() == 0) return null;
         note.setId(cursor.getLong(0));
         note.setCityName(cursor.getString(1));
         note.setTemper(cursor.getFloat(2));

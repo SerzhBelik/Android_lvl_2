@@ -24,6 +24,9 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.belikov.myapplication.DBTools.WeatherDataReader;
+import com.example.belikov.myapplication.DBTools.WeatherDataSource;
 import com.example.belikov.myapplication.interfaces.OpenWeather;
 import com.example.belikov.myapplication.model.City;
 import com.example.belikov.myapplication.model.WeatherRequest;
@@ -71,6 +74,10 @@ public class MainActivity extends AppCompatActivity
     private int valueHumidity;
     private int valuePress;
 
+    private WeatherDataSource notesDataSource;     // Источник данных
+    private WeatherDataReader noteDataReader;      // Читатель данных
+
+
     private final String[] cities = {"Moscow", "Novosibirsk", "Saint Petersburg,ru", "Nizhniy Novgorod", "Vladivostok"};
     private final String[] citiesImages = {"https://www.rgo.ru/sites/default/files/styles/full_view/public/20.02.2014_ilya_melnikov_moskva_0.jpg?itok=CZ--BHfl",
                                             "https://avatars.mds.yandex.net/get-pdb/812271/9d5c0197-6b9d-499e-b4fd-14f9964e0fe4/s1200",
@@ -84,10 +91,18 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         init();
+        initDataSource();
         initRetorfit();
         requestRetrofit(currentCity, API_KEY);
 
     }
+
+    private void initDataSource(){
+        notesDataSource = new WeatherDataSource(getApplicationContext());
+        notesDataSource.open();
+        noteDataReader = notesDataSource.getNoteDataReader();
+    }
+
 
     private void initRetorfit(){
         Retrofit retrofit;
@@ -114,6 +129,16 @@ public class MainActivity extends AppCompatActivity
                         valueHumidity = response.body().getMain().getHumidity();
                         valuePress = response.body().getMain().getPressure();
                         setParams();
+
+                        noteDataReader.open(currentCity);
+                        if (noteDataReader.getPosition(0) == null) {
+                            notesDataSource.addNote(currentCity, valueTemper, valueWind, valueHumidity, valuePress);
+                            int i = noteDataReader.getCount();
+                            Toast.makeText(MainActivity.this, "getCount() " + i, Toast.LENGTH_SHORT).show();
+                        } else {
+                            notesDataSource.editNote(noteDataReader.getPosition(0),currentCity, valueTemper, valueWind, valueHumidity, valuePress);
+                        }
+
                     }
 
                     @Override
