@@ -6,7 +6,7 @@ import retrofit2.http.Query;
 import com.example.belikov.myapplication.model.WeatherRequest;
 
 public interface OpenWeather {
-    @GET("data/2.5/weather")
+    @GET("data/2.5/forecast")
     Call<WeatherRequest> loadWeather(@Query("q") String cityCountry, @Query("appid") String keyApi);
 }
 

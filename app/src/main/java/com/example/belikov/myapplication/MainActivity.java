@@ -116,15 +116,16 @@ public class MainActivity extends AppCompatActivity
                 .enqueue(new Callback<WeatherRequest>() {
                     @Override
                     public void onResponse(Call<WeatherRequest> call, Response<WeatherRequest> response) {
-                        if (response.body() != null)
-                            valueTemper = (float)((int)((response.body().getMain().getTemp() - 273)*10))/10;
+                        if (response.body() != null) {
+//                            valueTemper = (float) ((int) ((response.body().getMain().getTemp() - 273) * 10)) / 10;
+//                            valueWind = response.body().getWind().getSpeed();
+//                            valueHumidity = response.body().getMain().getHumidity();
+//                            valuePress = response.body().getMain().getPressure();
+//                            setParams();
+//                            addOrUpdate();
 
-                        valueWind = response.body().getWind().getSpeed();
-                        valueHumidity = response.body().getMain().getHumidity();
-                        valuePress = response.body().getMain().getPressure();
-                        setParams();
 
-                        addOrUpdate();
+                        }
 
                     }
 
