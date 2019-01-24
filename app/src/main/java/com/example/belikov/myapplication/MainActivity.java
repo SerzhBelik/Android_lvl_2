@@ -28,6 +28,7 @@ import com.example.belikov.myapplication.DBTools.WeatherDataReader;
 import com.example.belikov.myapplication.DBTools.WeatherDataSource;
 import com.example.belikov.myapplication.DBTools.WeatherNote;
 import com.example.belikov.myapplication.interfaces.OpenWeather;
+import com.example.belikov.myapplication.model.WeatherForecast;
 import com.example.belikov.myapplication.model.WeatherRequest;
 import com.squareup.picasso.Picasso;
 import java.util.HashMap;
@@ -80,6 +81,8 @@ public class MainActivity extends AppCompatActivity
                                             "https://nashaplaneta.net/europe/russia/img_nizhny/kreml-nizhniy_mini.jpg",
                                             "https://img-fotki.yandex.ru/get/467152/30348152.234/0_9311f_52ade03c_orig"};
     private HashMap<String, String> citiesMap= new HashMap<>();
+    private String temp;
+    private String[] cityCountry = {"Moscow", "RU"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,10 +115,12 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void requestRetrofit(String city, String keyApi){
-        openWeather.loadWeather(city, keyApi)
-                .enqueue(new Callback<WeatherRequest>() {
+        openWeather.loadWeather(cityCountry, keyApi)
+                .enqueue(new Callback<WeatherForecast>() {
                     @Override
-                    public void onResponse(Call<WeatherRequest> call, Response<WeatherRequest> response) {
+                    public void onResponse(Call<WeatherForecast> call, Response<WeatherForecast> response) {
+
+
                         if (response.body() != null) {
 //                            valueTemper = (float) ((int) ((response.body().getMain().getTemp() - 273) * 10)) / 10;
 //                            valueWind = response.body().getWind().getSpeed();
@@ -124,13 +129,16 @@ public class MainActivity extends AppCompatActivity
 //                            setParams();
 //                            addOrUpdate();
 
+                            temp = response.body().getItems().get(0).getTempMax();
+                            Toast.makeText(MainActivity.this, temp, Toast.LENGTH_SHORT).show();
 
                         }
+
 
                     }
 
                     @Override
-                    public void onFailure(Call<WeatherRequest> call, Throwable t) {
+                    public void onFailure(Call<WeatherForecast> call, Throwable t) {
                         temperTextView.setText(getResources().getString(R.string.temper) + " " + "Error");
                          windTextView.setText(getResources().getString(R.string.wind) + " " + "Error");
                         humidTextView.setText(getResources().getString(R.string.humid) + " " + "Error");
@@ -215,13 +223,15 @@ public class MainActivity extends AppCompatActivity
                 currentCity = city.getText().toString();
                 noteDataReader.open(currentCity);
                 WeatherNote note = noteDataReader.getPosition(0);
-                if (note != null) {
-                    Toast.makeText(MainActivity.this, "get from DB", Toast.LENGTH_SHORT).show();
-                    getParamFromDB(note);
-                }else {
-                    requestRetrofit(currentCity, API_KEY);
-                    Toast.makeText(MainActivity.this, "get from internet", Toast.LENGTH_SHORT).show();
-                }
+//                if (note != null) {
+//                    Toast.makeText(MainActivity.this, "get from DB", Toast.LENGTH_SHORT).show();
+//                    getParamFromDB(note);
+//                }else {
+//                    requestRetrofit(currentCity, API_KEY);
+//                    Toast.makeText(MainActivity.this, "get from internet", Toast.LENGTH_SHORT).show();
+//                }
+                Toast.makeText(MainActivity.this, "request", Toast.LENGTH_SHORT).show();
+                requestRetrofit(currentCity, API_KEY);
 
                 setImageView();
 
@@ -233,7 +243,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void getParamFromDB(WeatherNote note) {
-        Toast.makeText(MainActivity.this, note.getCityName(), Toast.LENGTH_SHORT).show();
+//        Toast.makeText(MainActivity.this, note.getCityName(), Toast.LENGTH_SHORT).show();
             valueTemper = note.getTemper();
             valueWind = note.getWind();
             valueHumidity = note.getHumidity();
