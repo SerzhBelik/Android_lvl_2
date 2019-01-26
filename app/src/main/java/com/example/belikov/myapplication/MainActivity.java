@@ -28,10 +28,15 @@ import com.example.belikov.myapplication.DBTools.WeatherDataReader;
 import com.example.belikov.myapplication.DBTools.WeatherDataSource;
 import com.example.belikov.myapplication.DBTools.WeatherNote;
 import com.example.belikov.myapplication.interfaces.OpenWeather;
+import com.example.belikov.myapplication.model.WeatherDay;
 import com.example.belikov.myapplication.model.WeatherForecast;
 import com.example.belikov.myapplication.model.WeatherRequest;
 import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -81,8 +86,8 @@ public class MainActivity extends AppCompatActivity
                                             "https://nashaplaneta.net/europe/russia/img_nizhny/kreml-nizhniy_mini.jpg",
                                             "https://img-fotki.yandex.ru/get/467152/30348152.234/0_9311f_52ade03c_orig"};
     private HashMap<String, String> citiesMap= new HashMap<>();
-    private String temp;
-    private String[] cityCountry = {"Moscow", "RU"};
+    private String temp; // удалить
+    private List<WeatherDay> weatherDayList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,7 +120,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void requestRetrofit(String city, String keyApi){
-        openWeather.loadWeather(cityCountry, keyApi)
+        openWeather.loadWeather(city, keyApi)
                 .enqueue(new Callback<WeatherForecast>() {
                     @Override
                     public void onResponse(Call<WeatherForecast> call, Response<WeatherForecast> response) {
@@ -128,8 +133,10 @@ public class MainActivity extends AppCompatActivity
 //                            valuePress = response.body().getMain().getPressure();
 //                            setParams();
 //                            addOrUpdate();
+                            filteredRespons(response);
 
-                            temp = response.body().getItems().get(0).getTempMax();
+
+                            temp = weatherDayList.get(0).getTemp();
                             Toast.makeText(MainActivity.this, temp, Toast.LENGTH_SHORT).show();
 
                         }
@@ -146,6 +153,20 @@ public class MainActivity extends AppCompatActivity
                     }
                 });
 
+    }
+
+    private void filteredRespons(Response<WeatherForecast> response) {
+        weatherDayList.clear();
+        WeatherForecast data = response.body();
+//        String a = Integer.toString(data.getItems().get(1).getDate().get(Calendar.HOUR_OF_DAY));
+//        Toast.makeText(MainActivity.this, a, Toast.LENGTH_SHORT).show();
+        for (WeatherDay day : data.getItems()){
+
+            if (day.getDate().get(Calendar.HOUR_OF_DAY) == 13){
+//                Toast.makeText(MainActivity.this, temp, Toast.LENGTH_SHORT).show();
+                weatherDayList.add(day);
+            }
+        }
     }
 
     private void addOrUpdate() {
@@ -217,10 +238,13 @@ public class MainActivity extends AppCompatActivity
 
 
         Button ok = findViewById(R.id.ok);
+        Button forecast = findViewById(R.id.forecast);
         ok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 currentCity = city.getText().toString();
+//                cityCountry[0] = currentCity;
+//                cityCountry[1] = "";
                 noteDataReader.open(currentCity);
                 WeatherNote note = noteDataReader.getPosition(0);
 //                if (note != null) {
@@ -235,6 +259,14 @@ public class MainActivity extends AppCompatActivity
 
                 setImageView();
 
+            }
+        });
+
+        forecast.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, ForecastActivity.class);
+                startActivity(intent);
             }
         });
 

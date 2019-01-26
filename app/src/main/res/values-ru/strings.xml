@@ -26,6 +26,6 @@
     <string name="press">Давление:</string>
     <string name="ok">OK</string>
     <string name="avg">Расчитать среднюю температуру за</string>
-    <string name="years">год(а) (лет)</string>
+    <string name="For_5_days">Прогноз на 5 дней</string>
 
 </resources>
