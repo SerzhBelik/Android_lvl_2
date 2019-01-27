@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources><string-array name="descriptions">
+    <item>Зеленый лес</item>
+    <item>Гора</item>
+    <item>Водопад</item>
+    <item>Небо</item>
+    <item>Туман</item>
+    <item>Поляна</item>
+    <item>Осень</item>
+</string-array>
+    <array name="pictures">
+        <item>@drawable/pogoda</item>
+        <item>@drawable/pogoda</item>
+        <item>@drawable/pogoda</item>
+        <item>@drawable/pogoda</item>
+        <item>@drawable/pogoda</item>
+        <item>@drawable/pogoda</item>
+        <item>@drawable/pogoda</item>
+    </array></resources>

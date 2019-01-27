@@ -8,6 +8,8 @@ import android.widget.Toast;
 
 import com.example.belikov.myapplication.interfaces.OpenWeather;
 import com.example.belikov.myapplication.model.WeatherForecast;
+import com.example.belikov.myapplication.tools.DataSourceBuilder;
+import com.example.belikov.myapplication.tools.WeatherAdapter;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -25,6 +27,12 @@ public class ForecastActivity extends Activity {
 
         LinearLayoutManager llm = new LinearLayoutManager(this);
         rv.setLayoutManager(llm);
+
+        String[] a = {"a", "b", "c", "d"};
+        DataSourceBuilder builder = new DataSourceBuilder(a, a, a, a);
+
+        WeatherAdapter adapter = new WeatherAdapter(builder.build());
+        rv.setAdapter(adapter);
 
 
     }
