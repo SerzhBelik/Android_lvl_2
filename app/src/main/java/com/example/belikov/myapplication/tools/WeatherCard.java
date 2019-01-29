@@ -1,14 +1,20 @@
 package com.example.belikov.myapplication.tools;
 
 public class WeatherCard {
+    private String date;
     private String temper; // описание
     private String wind;
     private String humid;
     private String press;
 
 
+    public String getDate() {
+        return date;
+    }
 
-    public WeatherCard(String temper, String wind, String humid, String press){
+    public WeatherCard(String date, String temper, String wind, String humid, String press){
+        this.date = date;
+
         this.temper = temper;
         this.wind = wind;
         this.humid = humid;

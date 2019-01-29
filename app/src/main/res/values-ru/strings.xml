@@ -27,5 +27,7 @@
     <string name="ok">OK</string>
     <string name="avg">Расчитать среднюю температуру за</string>
     <string name="For_5_days">Прогноз на 5 дней</string>
+    <string name="mps"> м/с</string>
+    <string name="hpa"> кПа</string>
 
 </resources>

@@ -11,14 +11,16 @@ import java.util.List;
 // Построитель источника данных
 public class DataSourceBuilder {
     private List<WeatherCard> dataSource;   // Строим этот источник данных
+    String[] date;
     String[] temper;
     String[] wind;
     String[] humid;
     String[] press;
 //    private Resources resources;    // Ресурсы приложения
 
-    public DataSourceBuilder(String[] temper, String[] wind, String[] humid, String[] press) {
+    public DataSourceBuilder(String[] date, String[] temper, String[] wind, String[] humid, String[] press) {
         dataSource = new ArrayList<>(5);
+        this.date = date;
         this.temper = temper;
         this.wind = wind;
         this.humid = humid;
@@ -32,7 +34,7 @@ public class DataSourceBuilder {
 
         // Заполнение источника данных
         for (int i = 0; i < temper.length; i++) {
-            dataSource.add(new WeatherCard(temper[i], wind[i], humid[i], press[i]));
+            dataSource.add(new WeatherCard(date[i], temper[i], wind[i], humid[i], press[i]));
         }
         return dataSource;
     }

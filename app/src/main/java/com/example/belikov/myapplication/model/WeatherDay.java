@@ -6,10 +6,12 @@ import java.util.Calendar;
 import java.util.List;
 
 public class WeatherDay {
-    public class WeatherTemp {
+    public class WeatherMain {
         Double temp;
         Double temp_min;
         Double temp_max;
+        Integer humidity;
+        Double pressure;
     }
 
     public class WeatherDescription {
@@ -17,7 +19,7 @@ public class WeatherDay {
     }
 
     @SerializedName("main")
-    private WeatherTemp temp;
+    private WeatherMain main;
 
     @SerializedName("weather")
     private List<WeatherDescription> desctiption;
@@ -28,8 +30,16 @@ public class WeatherDay {
     @SerializedName("dt")
     private long timestamp;
 
-    public WeatherDay(WeatherTemp temp, List<WeatherDescription> desctiption) {
-        this.temp = temp;
+    @SerializedName("wind")
+    private Wind wind;
+
+
+    public Wind getWind() {
+        return wind;
+    }
+
+    public WeatherDay(WeatherMain main, List<WeatherDescription> desctiption) {
+        this.main = main;
         this.desctiption = desctiption;
     }
 
@@ -39,15 +49,19 @@ public class WeatherDay {
         return date;
     }
 
-    public String getTemp() { return String.valueOf(temp.temp); }
+    public String getTemp() { return String.valueOf(main.temp); }
 
-    public String getTempMin() { return String.valueOf(temp.temp_min); }
+    public String getTempMin() { return String.valueOf(main.temp_min); }
 
-    public String getTempMax() { return String.valueOf(temp.temp_max); }
+    public String getTempMax() { return String.valueOf(main.temp_max); }
 
-    public String getTempInteger() { return String.valueOf(temp.temp.intValue()); }
+    public String getHumid() { return String.valueOf(main.humidity);}
 
-    public String getTempWithDegree() { return String.valueOf(temp.temp.intValue()) + "\u00B0"; }
+    public String getPress() { return String.valueOf(main.pressure);}
+
+    public String getTempInteger() { return String.valueOf(main.temp.intValue()); }
+
+    public String getTempWithDegree() { return String.valueOf(main.temp.intValue()) + "\u00B0"; }
 
     public String getCity() { return city; }
 

@@ -22,6 +22,7 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.ViewHold
     // один пункт списка.
     public class ViewHolder extends RecyclerView.ViewHolder {
 
+        public TextView date;
         public TextView temper;
         public TextView wind;
         public TextView humid;
@@ -29,6 +30,7 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.ViewHold
 
         public ViewHolder(View v) {
             super(v);
+            date = v.findViewById(R.id.card_date);
             temper = v.findViewById(R.id.card_temper);
             wind = v.findViewById(R.id.card_wind);
             humid = v.findViewById(R.id.card_humid);
@@ -79,7 +81,7 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.ViewHold
         // На каком-то этапе будет переиспользование карточки, и в лог эта строка не попадет
         // а строка onBindViewHolder попадет. Это будет означать, что старая карточка
         // переоткрыта с новыми данными
-        Log.d("SocnetAdapter", "onCreateViewHolder");
+        Log.d("WeatherAdapter", "onCreateViewHolder");
         return vh;
     }
 
@@ -90,6 +92,7 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.ViewHold
         // Получить элемент из источника данных (БД, интернет...)
         WeatherCard item = dataSource.get(position);
         // Вынести на экран используя ViewHolder
+        holder.date.setText(item.getDate());
         holder.temper.setText(item.getTemper());
         holder.wind.setText(item.getWind());
         holder.press.setText(item.getPress());

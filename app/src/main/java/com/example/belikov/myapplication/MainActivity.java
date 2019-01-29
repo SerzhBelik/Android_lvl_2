@@ -62,10 +62,11 @@ public class MainActivity extends AppCompatActivity
     private NavigationView navigationView;
     private View headerLayout;
 
-    private static final String CELSIUS = " °C";
-    private static final String FAHRENHEIT = " °F";
+    public static final String CELSIUS = " °C";
+    public static final String FAHRENHEIT = " °F";
     public static final String CITY = "city";
-    private static final String API_KEY = "edfdd9d40eefbcf9979031dd4a5ff0c5";
+    public static final String CHOOSE_CITY = "choose_city";
+    public static final String API_KEY = "edfdd9d40eefbcf9979031dd4a5ff0c5";
     private String currentCity;
 
     private boolean isCelsius = true;
@@ -266,6 +267,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, ForecastActivity.class);
+                intent.putExtra(CHOOSE_CITY, currentCity);
                 startActivity(intent);
             }
         });
