@@ -98,12 +98,8 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.ViewHold
         holder.press.setText(item.getPress());
         holder.humid.setText(item.getHumid());
 
-//        holder.description.setText(item.getDescription());
-//        holder.picture.setImageResource(item.getPicture());
-//        holder.like.setChecked(item.getLike());
-
         // Отрабатывает при необходимости нарисовать карточку
-        Log.d("SocnetAdapter", "onBindViewHolder");
+        Log.d("WeatherAdapter", "onBindViewHolder");
     }
 
     // Вернуть размер данных, вызывается менеджером

@@ -26,6 +26,7 @@ public class ForecastActivity extends Activity {
     private OpenWeather openWeather;
     private String temp;
     private List<WeatherDay> weatherDayList = new ArrayList<>();
+    private String[] dateData = new String[5];
     private String[] tempData = new String[5];
     private String[] windData = new String[5];
     private String[] humidData= new String[5];
@@ -88,7 +89,7 @@ public class ForecastActivity extends Activity {
 //                            Toast.makeText(ForecastActivity.this, temp, Toast.LENGTH_SHORT).show();
                             formWeatherData();
 
-//                            setWeatherCards();
+                            setWeatherCards();
 
                         }
 
@@ -105,6 +106,8 @@ public class ForecastActivity extends Activity {
                 });
 
     }
+
+
 
     private void filteredRespons(Response<WeatherForecast> response) {
         weatherDayList.clear();
@@ -129,10 +132,9 @@ public class ForecastActivity extends Activity {
         rv.setLayoutManager(llm);
 
 //        Calendar calendar = Calendar.getInstance();
-        String[] dateData = new String[5];
-        for (int i = 0; i < dateData.length; i++){
-            dateData[i] = "date";
-        }
+//        for (int i = 0; i < dateData.length; i++){
+//
+//        }
 
 
         String td = getResources().getString(R.string.temper);
@@ -140,6 +142,7 @@ public class ForecastActivity extends Activity {
         String hd = getResources().getString(R.string.humid);
         String pd = getResources().getString(R.string.press);
         for (int i = 0; i < tempData.length; i++) {
+            dateData[i] = "date";
             tempData [i]= td;
             windData [i]= wd;
             humidData[i]= hd;
@@ -177,6 +180,17 @@ public class ForecastActivity extends Activity {
 //        Toast.makeText(ForecastActivity.this, temp, Toast.LENGTH_SHORT).show();
 
         }
+
+    private void setWeatherCards() {
+        RecyclerView rv = findViewById(R.id.recycler_view);
+        rv.setHasFixedSize(true);
+        LinearLayoutManager llm = new LinearLayoutManager(this);
+        rv.setLayoutManager(llm);
+        builder = new DataSourceBuilder(dateData, tempData, windData, humidData, pressData);
+
+        adapter = new WeatherAdapter(builder.build());
+        rv.setAdapter(adapter);
+    }
 
 
 }
