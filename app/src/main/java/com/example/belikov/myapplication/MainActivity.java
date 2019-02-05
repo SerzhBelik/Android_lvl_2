@@ -476,6 +476,27 @@ public class MainActivity extends AppCompatActivity
         Criteria criteria = new Criteria();
         criteria.setAccuracy(Criteria.ACCURACY_COARSE);
 
+        LocationListener listener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                if (location!=null) {
+                    lat = location.getLatitude();
+                    lon = location.getLongitude();
+                    Toast.makeText(MainActivity.this, lat + " " + lon, Toast.LENGTH_SHORT).show();
+                    requestRetrofitWithCoord(lat, lon, UNIT, API_KEY);
+                }
+            }
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+            }
+            @Override
+            public void onProviderEnabled(String provider) {
+            }
+            @Override
+            public void onProviderDisabled(String provider) {
+            }
+        };
+
 // Получим наиболее подходящий провайдер геолокации по критериям
 // Но можно и самому назначать, какой провайдер использовать
 // В основном это LocationManager.GPS_PROVIDER или LocationManager.NETWORK_PROVIDER
@@ -484,37 +505,38 @@ public class MainActivity extends AppCompatActivity
 
 //        Toast.makeText(MainActivity.this, provider, Toast.LENGTH_SHORT).show();
         if (provider != null) {
+            locationManager.requestSingleUpdate (provider, listener, null);
 //            textProvider.setText(provider);
 // Будем получать геоположение через каждые 10 секунд или каждые 10 метров
-            locationManager.requestLocationUpdates(provider, 0, 10, new LocationListener() {
-                @Override
-                public void onLocationChanged(Location location) {
-// Широта
-                    lat = location.getLatitude();
-// Долгота
-                   lon = location.getLongitude();
-
-                    Toast.makeText(MainActivity.this, lat + " " + lon, Toast.LENGTH_SHORT).show();
-
-
-                   requestRetrofitWithCoord(lat, lon, UNIT, API_KEY);
-// Точность
-
-                    String accuracy = Float.toString(location.getAccuracy());
-//                    textAccuracy.setText(accuracy);
-//                    textLatitude.setText(latitude);
-//                    textLongitude.setText(longitude);
-                }
-                @Override
-                public void onStatusChanged(String provider, int status, Bundle extras) {
-                }
-                @Override
-                public void onProviderEnabled(String provider) {
-                }
-                @Override
-                public void onProviderDisabled(String provider) {
-                }
-            });
+//            locationManager.requestLocationUpdates(provider, 10, 10, new LocationListener() {
+//                @Override
+//                public void onLocationChanged(Location location) {
+//// Широта
+//                    lat = location.getLatitude();
+//// Долгота
+//                   lon = location.getLongitude();
+//
+//                    Toast.makeText(MainActivity.this, lat + " " + lon, Toast.LENGTH_SHORT).show();
+//
+//
+//                   requestRetrofitWithCoord(lat, lon, UNIT, API_KEY);
+//// Точность
+//
+//                    String accuracy = Float.toString(location.getAccuracy());
+////                    textAccuracy.setText(accuracy);
+////                    textLatitude.setText(latitude);
+////                    textLongitude.setText(longitude);
+//                }
+//                @Override
+//                public void onStatusChanged(String provider, int status, Bundle extras) {
+//                }
+//                @Override
+//                public void onProviderEnabled(String provider) {
+//                }
+//                @Override
+//                public void onProviderDisabled(String provider) {
+//                }
+//            });
         }
     }
 
