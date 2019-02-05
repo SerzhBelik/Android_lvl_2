@@ -1,12 +1,20 @@
 package com.example.belikov.myapplication;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.view.ContextMenu;
 import android.view.MenuInflater;
 import android.view.View;
@@ -68,6 +76,7 @@ public class MainActivity extends AppCompatActivity
     public static final String CHOOSE_CITY = "choose_city";
     public static final String API_KEY = "edfdd9d40eefbcf9979031dd4a5ff0c5";
     private static final String UNIT = "metric";
+    private static final int PERMISSION_REQUEST_CODE = 10;
     private String currentCity;
 
     private boolean isCelsius = true;
@@ -76,13 +85,15 @@ public class MainActivity extends AppCompatActivity
     private float valueWind;
     private int valueHumidity;
     private int valuePress;
-    private double lat = 36;
-    private double lon = 139;
+    private double lat;
+    private double lon;
 
 
     private WeatherDataSource notesDataSource;     // Источник данных
     private WeatherDataReader noteDataReader;      // Читатель данных
 
+    private LocationManager locationManager;
+    private String provider;
 
     private final String[] cities = {"Moscow", "Novosibirsk", "Saint Petersburg,ru", "Nizhniy Novgorod", "Vladivostok"};
     private final String[] citiesImages = {"https://www.rgo.ru/sites/default/files/styles/full_view/public/20.02.2014_ilya_melnikov_moskva_0.jpg?itok=CZ--BHfl",
@@ -101,8 +112,7 @@ public class MainActivity extends AppCompatActivity
         init();
         initDataSource();
         initRetorfit();
-//        requestRetrofit(currentCity, API_KEY);
-        requestRetrofitWithCoord(lat, lon, UNIT, API_KEY);
+        requestRetrofit(currentCity, API_KEY);
 
     }
 
@@ -132,7 +142,7 @@ public class MainActivity extends AppCompatActivity
         valuePress = (int)Math.round(data.getPress());
         currentCity = data.getCity();
 
-        Toast.makeText(MainActivity.this, currentCity, Toast.LENGTH_SHORT).show();
+//        Toast.makeText(MainActivity.this, currentCity, Toast.LENGTH_SHORT).show();
         setParams();
         addOrUpdate();
     }
@@ -366,7 +376,25 @@ public class MainActivity extends AppCompatActivity
             return true;
         }
 
+        if (id == R.id.nav){
+            getPosition();
+//            requestRetrofitWithCoord(lat, lon, UNIT, API_KEY);
+        }
+
         return super.onOptionsItemSelected(item);
+    }
+
+    private void getPosition() {
+        // Проверим на пермиссии, и если их нет, запросим у пользователя
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+// Запросим координаты
+            requestLocation();
+        } else {
+// Пермиссии нет, будем запрашивать у пользователя
+            requestLocationPermissions();
+        }
+
     }
 
 
@@ -439,6 +467,84 @@ public class MainActivity extends AppCompatActivity
     private void setFahrenParam(){
         temperTextView.setText(getResources().getString(R.string.temper) + " " + ((float)((int)(((valueTemper*9/5+32))*10))/10) + FAHRENHEIT);
     }
+    private void requestLocation() {
+// Если пермиссии все-таки нет - просто выйдем, приложение не имеет смысла
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+            return;
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        Criteria criteria = new Criteria();
+        criteria.setAccuracy(Criteria.ACCURACY_COARSE);
+
+// Получим наиболее подходящий провайдер геолокации по критериям
+// Но можно и самому назначать, какой провайдер использовать
+// В основном это LocationManager.GPS_PROVIDER или LocationManager.NETWORK_PROVIDER
+// Но может быть и LocationManager.PASSIVE_PROVIDER (когда координаты уже кто-то недавно получил)
+        provider = locationManager.getBestProvider(criteria, true);
+
+//        Toast.makeText(MainActivity.this, provider, Toast.LENGTH_SHORT).show();
+        if (provider != null) {
+//            textProvider.setText(provider);
+// Будем получать геоположение через каждые 10 секунд или каждые 10 метров
+            locationManager.requestLocationUpdates(provider, 0, 10, new LocationListener() {
+                @Override
+                public void onLocationChanged(Location location) {
+// Широта
+                    lat = location.getLatitude();
+// Долгота
+                   lon = location.getLongitude();
+
+                    Toast.makeText(MainActivity.this, lat + " " + lon, Toast.LENGTH_SHORT).show();
+
+
+                   requestRetrofitWithCoord(lat, lon, UNIT, API_KEY);
+// Точность
+
+                    String accuracy = Float.toString(location.getAccuracy());
+//                    textAccuracy.setText(accuracy);
+//                    textLatitude.setText(latitude);
+//                    textLongitude.setText(longitude);
+                }
+                @Override
+                public void onStatusChanged(String provider, int status, Bundle extras) {
+                }
+                @Override
+                public void onProviderEnabled(String provider) {
+                }
+                @Override
+                public void onProviderDisabled(String provider) {
+                }
+            });
+        }
+    }
+
+    private void requestLocationPermissions() {
+        if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CALL_PHONE)) {
+// Запросим эти две пермиссии у пользователя
+            ActivityCompat.requestPermissions(this,
+                    new String[]{
+                            Manifest.permission.ACCESS_COARSE_LOCATION,
+                            Manifest.permission.ACCESS_FINE_LOCATION
+                    },
+                    PERMISSION_REQUEST_CODE);
+        }
+    }
+
+
+    // Это результат запроса у пользователя пермиссии
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+// Это та самая пермиссия, что мы запрашивали?
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            if (grantResults.length == 2 &&
+                    (grantResults[0] == PackageManager.PERMISSION_GRANTED || grantResults[1] == PackageManager.PERMISSION_GRANTED)) {
+                // Пермиссия дана
+                requestLocation();
+            }
+        }
+    }
+
+
 
 
 

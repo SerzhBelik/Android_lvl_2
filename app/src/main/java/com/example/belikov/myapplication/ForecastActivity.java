@@ -36,6 +36,7 @@ public class ForecastActivity extends Activity {
     private WeatherForecast data;
     private DataSourceBuilder builder;
     private WeatherAdapter adapter;
+    private Calendar calendar;
 
 
 
@@ -132,7 +133,8 @@ public class ForecastActivity extends Activity {
         LinearLayoutManager llm = new LinearLayoutManager(this);
         rv.setLayoutManager(llm);
 
-        Calendar calendar = Calendar.getInstance();
+        calendar = Calendar.getInstance();
+        Toast.makeText(ForecastActivity.this, calendar.getTime().toString(), Toast.LENGTH_SHORT).show();
         SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
         String date;
         String td = getResources().getString(R.string.temper);
