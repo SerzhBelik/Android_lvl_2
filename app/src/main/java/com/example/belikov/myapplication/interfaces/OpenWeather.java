@@ -13,6 +13,14 @@ public interface OpenWeather {
     Call<WeatherForecast> loadWeather(@Query("q") String cityCountry, @Query("appid") String keyApi);
 
     @GET("data/2.5/weather")
-    Call<WeatherRequest> loadWeatherToday(@Query("q") String cityCountry, @Query("appid") String keyApi);
+    Call<WeatherDay> loadWeatherToday(@Query("q") String cityCountry, @Query("appid") String keyApi);
+
+    @GET("data/2.5/weather")
+    Call<WeatherDay> loadWeatherTodayWithCoord(
+            @Query("lat") Double lat,
+            @Query("lon") Double lon,
+            @Query("units") String units,
+            @Query("appid") String appid
+    );
 }
 

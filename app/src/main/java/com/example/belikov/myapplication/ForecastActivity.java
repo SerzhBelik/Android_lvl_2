@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.belikov.myapplication.interfaces.OpenWeather;
@@ -12,6 +13,7 @@ import com.example.belikov.myapplication.model.WeatherForecast;
 import com.example.belikov.myapplication.tools.DataSourceBuilder;
 import com.example.belikov.myapplication.tools.WeatherAdapter;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -24,7 +26,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ForecastActivity extends Activity {
     private OpenWeather openWeather;
-    private String temp;
+    private String currentCity;
     private List<WeatherDay> weatherDayList = new ArrayList<>();
     private String[] dateData = new String[5];
     private String[] tempData = new String[5];
@@ -40,11 +42,10 @@ public class ForecastActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.forecast);
-
+        currentCity = getIntent().getStringExtra(MainActivity.CHOOSE_CITY);
         init();
-
         initRetorfit();
-        requestRetrofit(getIntent().getStringExtra(MainActivity.CHOOSE_CITY), MainActivity.API_KEY);
+        requestRetrofit(currentCity, MainActivity.API_KEY);
 
 
 
@@ -131,18 +132,17 @@ public class ForecastActivity extends Activity {
         LinearLayoutManager llm = new LinearLayoutManager(this);
         rv.setLayoutManager(llm);
 
-//        Calendar calendar = Calendar.getInstance();
-//        for (int i = 0; i < dateData.length; i++){
-//
-//        }
-
-
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
+        String date;
         String td = getResources().getString(R.string.temper);
         String wd = getResources().getString(R.string.wind);
         String hd = getResources().getString(R.string.humid);
         String pd = getResources().getString(R.string.press);
         for (int i = 0; i < tempData.length; i++) {
-            dateData[i] = "date";
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
+            date = format1.format(calendar.getTime());
+            dateData[i] = date;
             tempData [i]= td;
             windData [i]= wd;
             humidData[i]= hd;
@@ -157,12 +157,13 @@ public class ForecastActivity extends Activity {
         adapter = new WeatherAdapter(builder.build());
         rv.setAdapter(adapter);
 
+
     }
 
     private void formWeatherData() {
         for (int i = 0; i < weatherDayList.size(); i++) {
             tempData[i] = getResources().getString(R.string.temper) + " " +
-                    String.valueOf(Integer.parseInt(weatherDayList.get(i).getTemp().substring(0, 3)) - 273) +
+                    String.valueOf((int)(((weatherDayList.get(i).getTemp() - 273)* 10)) / 10) +
                     MainActivity.CELSIUS;
 
             windData[i] = getResources().getString(R.string.wind) + " " +
@@ -174,7 +175,7 @@ public class ForecastActivity extends Activity {
             pressData[i] = getResources().getString(R.string.press) + " " +
                     weatherDayList.get(i).getPress() + " " + getResources().getString(R.string.hpa);
             }
-        Toast.makeText(ForecastActivity.this, pressData[0], Toast.LENGTH_SHORT).show();
+//        Toast.makeText(ForecastActivity.this, pressData[0], Toast.LENGTH_SHORT).show();
 
 //        temp = tempData[0];
 //        Toast.makeText(ForecastActivity.this, temp, Toast.LENGTH_SHORT).show();
@@ -187,9 +188,12 @@ public class ForecastActivity extends Activity {
         LinearLayoutManager llm = new LinearLayoutManager(this);
         rv.setLayoutManager(llm);
         builder = new DataSourceBuilder(dateData, tempData, windData, humidData, pressData);
+        TextView headCity = findViewById(R.id.head_city);
+        headCity.setText(currentCity);
 
         adapter = new WeatherAdapter(builder.build());
         rv.setAdapter(adapter);
+
     }
 
 

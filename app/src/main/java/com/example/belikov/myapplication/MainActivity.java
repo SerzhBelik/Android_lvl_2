@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity
     public static final String CITY = "city";
     public static final String CHOOSE_CITY = "choose_city";
     public static final String API_KEY = "edfdd9d40eefbcf9979031dd4a5ff0c5";
+    private static final String UNIT = "metric";
     private String currentCity;
 
     private boolean isCelsius = true;
@@ -75,6 +76,9 @@ public class MainActivity extends AppCompatActivity
     private float valueWind;
     private int valueHumidity;
     private int valuePress;
+    private double lat = 36;
+    private double lon = 139;
+
 
     private WeatherDataSource notesDataSource;     // Источник данных
     private WeatherDataReader noteDataReader;      // Читатель данных
@@ -97,8 +101,47 @@ public class MainActivity extends AppCompatActivity
         init();
         initDataSource();
         initRetorfit();
-        requestRetrofit(currentCity, API_KEY);
+//        requestRetrofit(currentCity, API_KEY);
+        requestRetrofitWithCoord(lat, lon, UNIT, API_KEY);
 
+    }
+
+    private void requestRetrofitWithCoord(double lat, double lon, String unit, String apiKey) {
+        openWeather.loadWeatherTodayWithCoord(lat, lon, unit, apiKey)
+                .enqueue(new Callback<WeatherDay>() {
+                    @Override
+                    public void onResponse(Call<WeatherDay> call, Response<WeatherDay> response) {
+
+                        if (response.body() != null) {
+                            WeatherDay data = response.body();
+                            valueTemper = (float) ((int) ((data.getTemp()) * 10)) / 10;
+                            parseAndSet(data);
+                        } else Toast.makeText(MainActivity.this, "Sorry, city not found!", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFailure(Call<WeatherDay> call, Throwable t) {
+                        fail();
+                    }
+                });
+    }
+
+    private void parseAndSet(WeatherDay data) {
+        valueWind = data.getWind().getSpeed();
+        valueHumidity = data.getHumid();
+        valuePress = (int)Math.round(data.getPress());
+        currentCity = data.getCity();
+
+        Toast.makeText(MainActivity.this, currentCity, Toast.LENGTH_SHORT).show();
+        setParams();
+        addOrUpdate();
+    }
+
+    private void fail() {
+        temperTextView.setText(getResources().getString(R.string.temper) + " " + "Error");
+        windTextView.setText(getResources().getString(R.string.wind) + " " + "Error");
+        humidTextView.setText(getResources().getString(R.string.humid) + " " + "Error");
+        pressTextView.setText(getResources().getString(R.string.press) + " " +"Error");
     }
 
     private void initDataSource(){
@@ -121,36 +164,23 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void requestRetrofit(String city, String keyApi){
-        openWeather.loadWeather(city, keyApi)
-                .enqueue(new Callback<WeatherForecast>() {
+        openWeather.loadWeatherToday(city, keyApi)
+                .enqueue(new Callback<WeatherDay>() {
                     @Override
-                    public void onResponse(Call<WeatherForecast> call, Response<WeatherForecast> response) {
+                    public void onResponse(Call<WeatherDay> call, Response<WeatherDay> response) {
 
 
                         if (response.body() != null) {
-//                            valueTemper = (float) ((int) ((response.body().getMain().getTemp() - 273) * 10)) / 10;
-//                            valueWind = response.body().getWind().getSpeed();
-//                            valueHumidity = response.body().getMain().getHumidity();
-//                            valuePress = response.body().getMain().getPressure();
-//                            setParams();
-//                            addOrUpdate();
-                            filteredRespons(response);
-
-
-                            temp = weatherDayList.get(0).getTemp();
-                            Toast.makeText(MainActivity.this, temp, Toast.LENGTH_SHORT).show();
-
+                            WeatherDay data = response.body();
+                            valueTemper = (float) ((int) ((data.getTemp() - 273) * 10)) / 10;
+                            parseAndSet(data);
                         }
-
 
                     }
 
                     @Override
-                    public void onFailure(Call<WeatherForecast> call, Throwable t) {
-                        temperTextView.setText(getResources().getString(R.string.temper) + " " + "Error");
-                         windTextView.setText(getResources().getString(R.string.wind) + " " + "Error");
-                        humidTextView.setText(getResources().getString(R.string.humid) + " " + "Error");
-                        pressTextView.setText(getResources().getString(R.string.press) + " " +"Error");
+                    public void onFailure(Call<WeatherDay> call, Throwable t) {
+                        fail();
                     }
                 });
 
@@ -174,8 +204,6 @@ public class MainActivity extends AppCompatActivity
         noteDataReader.open(currentCity);
 
         if (noteDataReader.getPosition(0) == null) {
-//            noteDataReader.close();
-//            noteDataReader.open();
             Toast.makeText(MainActivity.this, "Add to DB", Toast.LENGTH_SHORT).show();
             notesDataSource.addNote(currentCity, valueTemper, valueWind, valueHumidity, valuePress);
         } else {
@@ -191,6 +219,7 @@ public class MainActivity extends AppCompatActivity
          windTextView.setText(getResources().getString(R.string.wind) + " " + valueWind + " mps");
         humidTextView.setText(getResources().getString(R.string.humid) + " " + valueHumidity + " %");
         pressTextView.setText(getResources().getString(R.string.press) + " " + valuePress + " hpa");
+        city.setText(currentCity);
     }
 
     private void init() {

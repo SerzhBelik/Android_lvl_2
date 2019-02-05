@@ -49,15 +49,15 @@ public class WeatherDay {
         return date;
     }
 
-    public String getTemp() { return String.valueOf(main.temp); }
+    public Double getTemp() { return main.temp; }
 
     public String getTempMin() { return String.valueOf(main.temp_min); }
 
     public String getTempMax() { return String.valueOf(main.temp_max); }
 
-    public String getHumid() { return String.valueOf(main.humidity);}
+    public Integer getHumid() { return main.humidity;}
 
-    public String getPress() { return String.valueOf(main.pressure);}
+    public Double getPress() { return main.pressure;}
 
     public String getTempInteger() { return String.valueOf(main.temp.intValue()); }
 
