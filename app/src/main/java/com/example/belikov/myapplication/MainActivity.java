@@ -34,21 +34,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.example.belikov.myapplication.DBTools.WeatherDataReader;
 import com.example.belikov.myapplication.DBTools.WeatherDataSource;
-import com.example.belikov.myapplication.DBTools.WeatherNote;
 import com.example.belikov.myapplication.interfaces.OpenWeather;
 import com.example.belikov.myapplication.model.WeatherDay;
-import com.example.belikov.myapplication.model.WeatherForecast;
-import com.example.belikov.myapplication.model.WeatherRequest;
-import com.squareup.picasso.Picasso;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -91,27 +81,21 @@ public class MainActivity extends AppCompatActivity
     private double lat;
     private double lon;
 
-
     private WeatherDataSource notesDataSource;     // Источник данных
     private WeatherDataReader noteDataReader;      // Читатель данных
 
     private LocationManager locationManager;
     private String provider;
-
-//    private final String[] cities = {"Moscow", "Novosibirsk", "Saint Petersburg,ru", "Nizhniy Novgorod", "Vladivostok"};
-//    private final String[] citiesImages = {"https://www.rgo.ru/sites/default/files/styles/full_view/public/20.02.2014_ilya_melnikov_moskva_0.jpg?itok=CZ--BHfl",
-//                                            "https://avatars.mds.yandex.net/get-pdb/812271/9d5c0197-6b9d-499e-b4fd-14f9964e0fe4/s1200",
-//                                            "https://cdn24.img.ria.ru/images/42278/81/422788117_0:0:600:340_600x0_80_0_0_8c05ee6cd03dcd9c5fa5073111f49514.jpg",
-//                                            "https://nashaplaneta.net/europe/russia/img_nizhny/kreml-nizhniy_mini.jpg",
-//                                            "https://img-fotki.yandex.ru/get/467152/30348152.234/0_9311f_52ade03c_orig"};
-    private HashMap<String, String> citiesMap= new HashMap<>();
-    private String temp; // удалить
-    private List<WeatherDay> weatherDayList = new ArrayList<>();
-    private Set<String> cityList = new HashSet<String>();
+    private Set<String> cityList = new HashSet<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (savedInstanceState != null){
+            currentCity = savedInstanceState.getString(CITY);
+        } else currentCity = "Moscow";
+
         setContentView(R.layout.activity_main);
         init();
         initDataSource();
@@ -130,7 +114,7 @@ public class MainActivity extends AppCompatActivity
                             WeatherDay data = response.body();
                             valueTemper = (float) ((int) ((data.getTemp()) * 10)) / 10;
                             parseAndSet(data);
-                        } else Toast.makeText(MainActivity.this, "Sorry, city not found!", Toast.LENGTH_SHORT).show();
+                        } else Toast.makeText(MainActivity.this, R.string.Sorry, Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
@@ -145,8 +129,6 @@ public class MainActivity extends AppCompatActivity
         valueHumidity = data.getHumid();
         valuePress = (int)Math.round(data.getPress());
         currentCity = data.getCity();
-
-//        Toast.makeText(MainActivity.this, currentCity, Toast.LENGTH_SHORT).show();
         setParams();
         addOrUpdate();
         updateAdapter();
@@ -155,23 +137,17 @@ public class MainActivity extends AppCompatActivity
     private void updateAdapter() {
         noteDataReader.open();
         int i = 0;
-        WeatherNote note;
         String c;
-        int count = noteDataReader.getCount();
         while (true){
-//            note = noteDataReader.getPosition(i);
             if (i >= noteDataReader.getCount()) break;
             c = noteDataReader.getPosition(i).getCityName();
             cityList.add(c);
-//            Toast.makeText(MainActivity.this, cityList.toArray(), Toast.LENGTH_SHORT).show();
             i++;
-
         }
 
         String[] ca = cityList.toArray(new String[cityList.size()]);
         city.setAdapter(new ArrayAdapter<>(this,
                 android.R.layout.simple_dropdown_item_1line, ca));
-        if (cityList.size()>0) Toast.makeText(MainActivity.this, ca[cityList.size()-1], Toast.LENGTH_SHORT).show();
     }
 
     private void fail() {
@@ -206,12 +182,11 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void onResponse(Call<WeatherDay> call, Response<WeatherDay> response) {
 
-
                         if (response.body() != null) {
                             WeatherDay data = response.body();
                             valueTemper = (float) ((int) ((data.getTemp() - 273) * 10)) / 10;
                             parseAndSet(data);
-                        }
+                        } else Toast.makeText(MainActivity.this, R.string.Sorry, Toast.LENGTH_SHORT).show();
 
                     }
 
@@ -223,29 +198,13 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    private void filteredRespons(Response<WeatherForecast> response) {
-        weatherDayList.clear();
-        WeatherForecast data = response.body();
-//        String a = Integer.toString(data.getItems().get(1).getDate().get(Calendar.HOUR_OF_DAY));
-//        Toast.makeText(MainActivity.this, a, Toast.LENGTH_SHORT).show();
-        for (WeatherDay day : data.getItems()){
-
-            if (day.getDate().get(Calendar.HOUR_OF_DAY) == 13){
-//                Toast.makeText(MainActivity.this, temp, Toast.LENGTH_SHORT).show();
-                weatherDayList.add(day);
-            }
-        }
-    }
 
     private void addOrUpdate() {
         noteDataReader.open(currentCity);
-
         if (noteDataReader.getPosition(0) == null) {
-//            Toast.makeText(MainActivity.this, "Add to DB", Toast.LENGTH_SHORT).show();
             notesDataSource.addNote(currentCity, valueTemper, valueWind, valueHumidity, valuePress);
         } else {
             notesDataSource.editNote(noteDataReader.getPosition(0),currentCity, valueTemper, valueWind, valueHumidity, valuePress);
-//            Toast.makeText(MainActivity.this, "Edit DB", Toast.LENGTH_SHORT).show();
         }
         noteDataReader.close();
     }
@@ -260,8 +219,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void init() {
-        currentCity = "Moscow";
-        cityList.add("Moscow");
+//        currentCity = "Moscow";
+//        cityList.add(currentCity);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -277,8 +236,6 @@ public class MainActivity extends AppCompatActivity
         imageView.setImageResource(R.drawable.pogoda);
         cityName = headerLayout.findViewById(R.id.city_name);
         city = findViewById(R.id.autoCompleteTextView);
-//        city.setAdapter(new ArrayAdapter<>(this,
-//                android.R.layout.simple_dropdown_item_1line, cityList.toArray()));
         city.setText(currentCity);
 
         sharedPref = getSharedPreferences(CITY, Context.MODE_PRIVATE);
@@ -311,22 +268,8 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 currentCity = city.getText().toString();
-//                cityCountry[0] = currentCity;
-//                cityCountry[1] = "";
-                noteDataReader.open(currentCity);
-                WeatherNote note = noteDataReader.getPosition(0);
-//                if (note != null) {
-//                    Toast.makeText(MainActivity.this, "get from DB", Toast.LENGTH_SHORT).show();
-//                    getParamFromDB(note);
-//                }else {
-//                    requestRetrofit(currentCity, API_KEY);
-//                    Toast.makeText(MainActivity.this, "get from internet", Toast.LENGTH_SHORT).show();
-//                }
                 Toast.makeText(MainActivity.this, "request", Toast.LENGTH_SHORT).show();
                 requestRetrofit(currentCity, API_KEY);
-
-//                setImageView();
-
             }
         });
 
@@ -338,34 +281,14 @@ public class MainActivity extends AppCompatActivity
                 startActivity(intent);
             }
         });
-
-//        mapInit();
-//        setImageView();
     }
 
-    private void getParamFromDB(WeatherNote note) {
-//        Toast.makeText(MainActivity.this, note.getCityName(), Toast.LENGTH_SHORT).show();
-            valueTemper = note.getTemper();
-            valueWind = note.getWind();
-            valueHumidity = note.getHumidity();
-            valuePress = note.getPress();
-            setParams();
-    }
-
-//    private void mapInit(){
-//        for (int i = 0; i < cities.length; i++){
-//            citiesMap.put(cities[i], citiesImages[i]);
-//        }
-//    }
-
-//    private void setImageView() {
-//        currentCity = city.getText().toString();
-//        cityName.setText(currentCity);
-//        String path = citiesMap.get(currentCity);
-//        Picasso
-//                .with(this)
-//                .load(path)
-//                .into(imageView);
+//    private void getParamFromDB(WeatherNote note) {
+//            valueTemper = note.getTemper();
+//            valueWind = note.getWind();
+//            valueHumidity = note.getHumidity();
+//            valuePress = note.getPress();
+//            setParams();
 //    }
 
     @Override
@@ -406,7 +329,6 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav){
             getPosition();
-//            requestRetrofitWithCoord(lat, lon, UNIT, API_KEY);
         }
 
         return super.onOptionsItemSelected(item);
@@ -470,15 +392,15 @@ public class MainActivity extends AppCompatActivity
         super.onDestroy();
     }
 
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.for_ten_days){
-            Toast.makeText(this, "create a new fragment", Toast.LENGTH_SHORT).show();
-            // create a new fragment
-
-        }
-        return true;
-    }
+//    @Override
+//    public boolean onContextItemSelected(MenuItem item) {
+//        if (item.getItemId() == R.id.for_ten_days){
+//            Toast.makeText(this, "create a new fragment", Toast.LENGTH_SHORT).show();
+//            // create a new fragment
+//
+//        }
+//        return true;
+//    }
 
     private void setLocale(String lang){
         locale = new Locale(lang);
@@ -530,41 +452,8 @@ public class MainActivity extends AppCompatActivity
 // В основном это LocationManager.GPS_PROVIDER или LocationManager.NETWORK_PROVIDER
 // Но может быть и LocationManager.PASSIVE_PROVIDER (когда координаты уже кто-то недавно получил)
         provider = locationManager.getBestProvider(criteria, true);
-
-//        Toast.makeText(MainActivity.this, provider, Toast.LENGTH_SHORT).show();
         if (provider != null) {
             locationManager.requestSingleUpdate (provider, listener, null);
-//            textProvider.setText(provider);
-// Будем получать геоположение через каждые 10 секунд или каждые 10 метров
-//            locationManager.requestLocationUpdates(provider, 10, 10, new LocationListener() {
-//                @Override
-//                public void onLocationChanged(Location location) {
-//// Широта
-//                    lat = location.getLatitude();
-//// Долгота
-//                   lon = location.getLongitude();
-//
-//                    Toast.makeText(MainActivity.this, lat + " " + lon, Toast.LENGTH_SHORT).show();
-//
-//
-//                   requestRetrofitWithCoord(lat, lon, UNIT, API_KEY);
-//// Точность
-//
-//                    String accuracy = Float.toString(location.getAccuracy());
-////                    textAccuracy.setText(accuracy);
-////                    textLatitude.setText(latitude);
-////                    textLongitude.setText(longitude);
-//                }
-//                @Override
-//                public void onStatusChanged(String provider, int status, Bundle extras) {
-//                }
-//                @Override
-//                public void onProviderEnabled(String provider) {
-//                }
-//                @Override
-//                public void onProviderDisabled(String provider) {
-//                }
-//            });
         }
     }
 
@@ -594,10 +483,11 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-
-
-
-
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putString(CITY, currentCity);
+        super.onSaveInstanceState(outState);
+    }
 }
 
 

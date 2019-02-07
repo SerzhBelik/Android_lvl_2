@@ -39,7 +39,6 @@ public class ForecastActivity extends Activity {
     private Calendar calendar;
 
 
-
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.forecast);
@@ -47,13 +46,6 @@ public class ForecastActivity extends Activity {
         init();
         initRetorfit();
         requestRetrofit(currentCity, MainActivity.API_KEY);
-
-
-
-
-
-
-
     }
 
 
@@ -78,32 +70,15 @@ public class ForecastActivity extends Activity {
 
 
                         if (response.body() != null) {
-//                            valueTemper = (float) ((int) ((response.body().getMain().getTemp() - 273) * 10)) / 10;
-//                            valueWind = response.body().getWind().getSpeed();
-//                            valueHumidity = response.body().getMain().getHumidity();
-//                            valuePress = response.body().getMain().getPressure();
-//                            setParams();
-//                            addOrUpdate();
                             filteredRespons(response);
-
-
-//                            temp = weatherDayList.get(0).getTemp();
-//                            Toast.makeText(ForecastActivity.this, temp, Toast.LENGTH_SHORT).show();
                             formWeatherData();
-
                             setWeatherCards();
-
                         }
-
-
                     }
 
                     @Override
                     public void onFailure(Call<WeatherForecast> call, Throwable t) {
-//                        temperTextView.setText(getResources().getString(R.string.temper) + " " + "Error");
-//                        windTextView.setText(getResources().getString(R.string.wind) + " " + "Error");
-//                        humidTextView.setText(getResources().getString(R.string.humid) + " " + "Error");
-//                        pressTextView.setText(getResources().getString(R.string.press) + " " +"Error");
+
                     }
                 });
 
@@ -114,12 +89,9 @@ public class ForecastActivity extends Activity {
     private void filteredRespons(Response<WeatherForecast> response) {
         weatherDayList.clear();
         data = response.body();
-//        String a = Integer.toString(data.getItems().get(1).getDate().get(Calendar.HOUR_OF_DAY));
-//        Toast.makeText(MainActivity.this, a, Toast.LENGTH_SHORT).show();
         for (WeatherDay day : data.getItems()){
 
             if (day.getDate().get(Calendar.HOUR_OF_DAY) == 13){
-//                Toast.makeText(MainActivity.this, temp, Toast.LENGTH_SHORT).show();
                 weatherDayList.add(day);
             }
         }
@@ -134,7 +106,6 @@ public class ForecastActivity extends Activity {
         rv.setLayoutManager(llm);
 
         calendar = Calendar.getInstance();
-        Toast.makeText(ForecastActivity.this, calendar.getTime().toString(), Toast.LENGTH_SHORT).show();
         SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
         String date;
         String td = getResources().getString(R.string.temper);
@@ -151,11 +122,7 @@ public class ForecastActivity extends Activity {
             pressData[i]= pd;
         }
 
-//        temp = tempData[0];
-//        Toast.makeText(ForecastActivity.this, temp, Toast.LENGTH_SHORT).show();
-
         builder = new DataSourceBuilder(dateData, tempData, windData, humidData, pressData);
-
         adapter = new WeatherAdapter(builder.build());
         rv.setAdapter(adapter);
 
@@ -177,10 +144,6 @@ public class ForecastActivity extends Activity {
             pressData[i] = getResources().getString(R.string.press) + " " +
                     weatherDayList.get(i).getPress() + " " + getResources().getString(R.string.hpa);
             }
-//        Toast.makeText(ForecastActivity.this, pressData[0], Toast.LENGTH_SHORT).show();
-
-//        temp = tempData[0];
-//        Toast.makeText(ForecastActivity.this, temp, Toast.LENGTH_SHORT).show();
 
         }
 

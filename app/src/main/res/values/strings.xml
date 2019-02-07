@@ -30,5 +30,6 @@
     <string name="mps"> mps</string>
     <string name="hpa"> hpa</string>
     <string name="pos">My position</string>
+    <string name="Sorry">Sorry, city not found!</string>
 
 </resources>

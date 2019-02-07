@@ -30,5 +30,6 @@
     <string name="mps"> м/с</string>
     <string name="hpa"> кПа</string>
     <string name="pos">Мое положение</string>
+    <string name="Sorry">Извините, город не найден!</string>
 
 </resources>
