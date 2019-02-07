@@ -44,8 +44,11 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -95,15 +98,16 @@ public class MainActivity extends AppCompatActivity
     private LocationManager locationManager;
     private String provider;
 
-    private final String[] cities = {"Moscow", "Novosibirsk", "Saint Petersburg,ru", "Nizhniy Novgorod", "Vladivostok"};
-    private final String[] citiesImages = {"https://www.rgo.ru/sites/default/files/styles/full_view/public/20.02.2014_ilya_melnikov_moskva_0.jpg?itok=CZ--BHfl",
-                                            "https://avatars.mds.yandex.net/get-pdb/812271/9d5c0197-6b9d-499e-b4fd-14f9964e0fe4/s1200",
-                                            "https://cdn24.img.ria.ru/images/42278/81/422788117_0:0:600:340_600x0_80_0_0_8c05ee6cd03dcd9c5fa5073111f49514.jpg",
-                                            "https://nashaplaneta.net/europe/russia/img_nizhny/kreml-nizhniy_mini.jpg",
-                                            "https://img-fotki.yandex.ru/get/467152/30348152.234/0_9311f_52ade03c_orig"};
+//    private final String[] cities = {"Moscow", "Novosibirsk", "Saint Petersburg,ru", "Nizhniy Novgorod", "Vladivostok"};
+//    private final String[] citiesImages = {"https://www.rgo.ru/sites/default/files/styles/full_view/public/20.02.2014_ilya_melnikov_moskva_0.jpg?itok=CZ--BHfl",
+//                                            "https://avatars.mds.yandex.net/get-pdb/812271/9d5c0197-6b9d-499e-b4fd-14f9964e0fe4/s1200",
+//                                            "https://cdn24.img.ria.ru/images/42278/81/422788117_0:0:600:340_600x0_80_0_0_8c05ee6cd03dcd9c5fa5073111f49514.jpg",
+//                                            "https://nashaplaneta.net/europe/russia/img_nizhny/kreml-nizhniy_mini.jpg",
+//                                            "https://img-fotki.yandex.ru/get/467152/30348152.234/0_9311f_52ade03c_orig"};
     private HashMap<String, String> citiesMap= new HashMap<>();
     private String temp; // удалить
     private List<WeatherDay> weatherDayList = new ArrayList<>();
+    private Set<String> cityList = new HashSet<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -145,6 +149,29 @@ public class MainActivity extends AppCompatActivity
 //        Toast.makeText(MainActivity.this, currentCity, Toast.LENGTH_SHORT).show();
         setParams();
         addOrUpdate();
+        updateAdapter();
+    }
+
+    private void updateAdapter() {
+        noteDataReader.open();
+        int i = 0;
+        WeatherNote note;
+        String c;
+        int count = noteDataReader.getCount();
+        while (true){
+//            note = noteDataReader.getPosition(i);
+            if (i >= noteDataReader.getCount()) break;
+            c = noteDataReader.getPosition(i).getCityName();
+            cityList.add(c);
+//            Toast.makeText(MainActivity.this, cityList.toArray(), Toast.LENGTH_SHORT).show();
+            i++;
+
+        }
+
+        String[] ca = cityList.toArray(new String[cityList.size()]);
+        city.setAdapter(new ArrayAdapter<>(this,
+                android.R.layout.simple_dropdown_item_1line, ca));
+        if (cityList.size()>0) Toast.makeText(MainActivity.this, ca[cityList.size()-1], Toast.LENGTH_SHORT).show();
     }
 
     private void fail() {
@@ -214,11 +241,11 @@ public class MainActivity extends AppCompatActivity
         noteDataReader.open(currentCity);
 
         if (noteDataReader.getPosition(0) == null) {
-            Toast.makeText(MainActivity.this, "Add to DB", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(MainActivity.this, "Add to DB", Toast.LENGTH_SHORT).show();
             notesDataSource.addNote(currentCity, valueTemper, valueWind, valueHumidity, valuePress);
         } else {
             notesDataSource.editNote(noteDataReader.getPosition(0),currentCity, valueTemper, valueWind, valueHumidity, valuePress);
-            Toast.makeText(MainActivity.this, "Edit DB", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(MainActivity.this, "Edit DB", Toast.LENGTH_SHORT).show();
         }
         noteDataReader.close();
     }
@@ -234,6 +261,7 @@ public class MainActivity extends AppCompatActivity
 
     private void init() {
         currentCity = "Moscow";
+        cityList.add("Moscow");
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -249,8 +277,8 @@ public class MainActivity extends AppCompatActivity
         imageView.setImageResource(R.drawable.pogoda);
         cityName = headerLayout.findViewById(R.id.city_name);
         city = findViewById(R.id.autoCompleteTextView);
-        city.setAdapter(new ArrayAdapter<>(this,
-                android.R.layout.simple_dropdown_item_1line, cities));
+//        city.setAdapter(new ArrayAdapter<>(this,
+//                android.R.layout.simple_dropdown_item_1line, cityList.toArray()));
         city.setText(currentCity);
 
         sharedPref = getSharedPreferences(CITY, Context.MODE_PRIVATE);
@@ -297,7 +325,7 @@ public class MainActivity extends AppCompatActivity
                 Toast.makeText(MainActivity.this, "request", Toast.LENGTH_SHORT).show();
                 requestRetrofit(currentCity, API_KEY);
 
-                setImageView();
+//                setImageView();
 
             }
         });
@@ -311,8 +339,8 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        mapInit();
-        setImageView();
+//        mapInit();
+//        setImageView();
     }
 
     private void getParamFromDB(WeatherNote note) {
@@ -324,21 +352,21 @@ public class MainActivity extends AppCompatActivity
             setParams();
     }
 
-    private void mapInit(){
-        for (int i = 0; i < cities.length; i++){
-            citiesMap.put(cities[i], citiesImages[i]);
-        }
-    }
+//    private void mapInit(){
+//        for (int i = 0; i < cities.length; i++){
+//            citiesMap.put(cities[i], citiesImages[i]);
+//        }
+//    }
 
-    private void setImageView() {
-        currentCity = city.getText().toString();
-        cityName.setText(currentCity);
-        String path = citiesMap.get(currentCity);
-        Picasso
-                .with(this)
-                .load(path)
-                .into(imageView);
-    }
+//    private void setImageView() {
+//        currentCity = city.getText().toString();
+//        cityName.setText(currentCity);
+//        String path = citiesMap.get(currentCity);
+//        Picasso
+//                .with(this)
+//                .load(path)
+//                .into(imageView);
+//    }
 
     @Override
     protected void onPause() {
