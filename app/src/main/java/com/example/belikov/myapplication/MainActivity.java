@@ -91,11 +91,15 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if (savedInstanceState != null){
+        currentCity = "Moscow";
+        if (savedInstanceState != null && savedInstanceState.getString(CITY) != null){
             currentCity = savedInstanceState.getString(CITY);
-        } else currentCity = "Moscow";
+        }
 
+        if( getIntent() != null && getIntent().getStringExtra(CITY) != null){
+           currentCity = getIntent().getStringExtra(CITY);
+        }
+//        Toast.makeText(this, currentCity, Toast.LENGTH_SHORT).show();
         setContentView(R.layout.activity_main);
         init();
         initDataSource();
@@ -268,7 +272,6 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 currentCity = city.getText().toString();
-                Toast.makeText(MainActivity.this, "request", Toast.LENGTH_SHORT).show();
                 requestRetrofit(currentCity, API_KEY);
             }
         });
@@ -277,6 +280,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, ForecastActivity.class);
+//                Intent intent = new Intent(MainActivity.this, Main2Activity.class);
                 intent.putExtra(CHOOSE_CITY, currentCity);
                 startActivity(intent);
             }
@@ -322,7 +326,9 @@ public class MainActivity extends AppCompatActivity
             if (Locale.getDefault().getLanguage().equals("en")){
                 setLocale("ru");
             } else setLocale("en");
-            startActivityForResult(new Intent(this, MainActivity.class), 0);
+            Intent intentChangeLang = new Intent(this, MainActivity.class);
+            intentChangeLang.putExtra(CITY, currentCity);
+            startActivityForResult(intentChangeLang, 0);
 
             return true;
         }
