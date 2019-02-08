@@ -31,5 +31,7 @@
     <string name="hpa"> hpa</string>
     <string name="pos">My position</string>
     <string name="Sorry">Sorry, city not found!</string>
+    <string name="Error">Error</string>
+    <string name="enter_city">Enter your city</string>
 
 </resources>

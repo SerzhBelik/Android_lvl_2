@@ -33,9 +33,16 @@ public class WeatherDay {
     @SerializedName("wind")
     private Wind wind;
 
+    @SerializedName("clouds")
+    private Clouds clouds;
+
 
     public Wind getWind() {
         return wind;
+    }
+
+    public Clouds getClouds() {
+        return clouds;
     }
 
     public WeatherDay(WeatherMain main, List<WeatherDescription> desctiption) {

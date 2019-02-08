@@ -36,6 +36,8 @@ import com.example.belikov.myapplication.DBTools.WeatherDataReader;
 import com.example.belikov.myapplication.DBTools.WeatherDataSource;
 import com.example.belikov.myapplication.interfaces.OpenWeather;
 import com.example.belikov.myapplication.model.WeatherDay;
+import com.google.gson.annotations.SerializedName;
+
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -72,7 +74,7 @@ public class MainActivity extends AppCompatActivity
     private static final int PERMISSION_REQUEST_CODE = 10;
     private String currentCity;
 
-    private boolean isCelsius = true;
+    private static boolean isCelsius = true;
 
     private float valueTemper;
     private float valueWind;
@@ -80,6 +82,7 @@ public class MainActivity extends AppCompatActivity
     private int valuePress;
     private double lat;
     private double lon;
+    private int weatherType;
 
     private WeatherDataSource notesDataSource;     // Источник данных
     private WeatherDataReader noteDataReader;      // Читатель данных
@@ -99,7 +102,7 @@ public class MainActivity extends AppCompatActivity
         if( getIntent() != null && getIntent().getStringExtra(CITY) != null){
            currentCity = getIntent().getStringExtra(CITY);
         }
-//        Toast.makeText(this, currentCity, Toast.LENGTH_SHORT).show();
+
         setContentView(R.layout.activity_main);
         init();
         initDataSource();
@@ -133,6 +136,7 @@ public class MainActivity extends AppCompatActivity
         valueHumidity = data.getHumid();
         valuePress = (int)Math.round(data.getPress());
         currentCity = data.getCity();
+        weatherType = data.getClouds().getAll();
         setParams();
         addOrUpdate();
         updateAdapter();
@@ -155,10 +159,10 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void fail() {
-        temperTextView.setText(getResources().getString(R.string.temper) + " " + "Error");
-        windTextView.setText(getResources().getString(R.string.wind) + " " + "Error");
-        humidTextView.setText(getResources().getString(R.string.humid) + " " + "Error");
-        pressTextView.setText(getResources().getString(R.string.press) + " " +"Error");
+        temperTextView.setText(getResources().getString(R.string.temper) + " " + R.string.Error);
+        windTextView.setText(getResources().getString(R.string.wind) + " " + R.string.Error);
+        humidTextView.setText(getResources().getString(R.string.humid) + " " + R.string.Error);
+        pressTextView.setText(getResources().getString(R.string.press) + " " +R.string.Error);
     }
 
     private void initDataSource(){
@@ -216,16 +220,23 @@ public class MainActivity extends AppCompatActivity
     private void setParams() {
         if (isCelsius)setCelsiusParam();
         else setFahrenParam();
-         windTextView.setText(getResources().getString(R.string.wind) + " " + valueWind + " mps");
+         windTextView.setText(getResources().getString(R.string.wind) + " " + valueWind + " " +
+                 getResources().getString(R.string.mps));
         humidTextView.setText(getResources().getString(R.string.humid) + " " + valueHumidity + " %");
-        pressTextView.setText(getResources().getString(R.string.press) + " " + valuePress + " hpa");
+        pressTextView.setText(getResources().getString(R.string.press) + " " + valuePress + " "
+                + getResources().getString(R.string.hpa));
+        cityName.setText(currentCity);
         city.setText(currentCity);
+
+        if (weatherType < 30){
+            imageView.setImageResource(R.drawable.sun);
+        } else if (weatherType < 70) {
+            imageView.setImageResource(R.drawable.sun_cloud);
+        } else imageView.setImageResource(R.drawable.cloudy);
+
     }
 
     private void init() {
-//        currentCity = "Moscow";
-//        cityList.add(currentCity);
-
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -233,11 +244,9 @@ public class MainActivity extends AppCompatActivity
         humidTextView = findViewById(R.id.humidity);
         windTextView = findViewById(R.id.wind);
         pressTextView = findViewById(R.id.pressure);
-
         navigationView = findViewById(R.id.nav_view);
         headerLayout = navigationView.getHeaderView(0);
         imageView = headerLayout.findViewById(R.id.imageView);
-        imageView.setImageResource(R.drawable.pogoda);
         cityName = headerLayout.findViewById(R.id.city_name);
         city = findViewById(R.id.autoCompleteTextView);
         city.setText(currentCity);
@@ -271,8 +280,13 @@ public class MainActivity extends AppCompatActivity
         ok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                currentCity = city.getText().toString();
-                requestRetrofit(currentCity, API_KEY);
+                if (!city.getText().toString().equals("")) {
+                    currentCity = city.getText().toString();
+                    requestRetrofit(currentCity, API_KEY);
+                } else {
+                    Toast.makeText(MainActivity.this, R.string.enter_city, Toast.LENGTH_SHORT).show();
+                }
+
             }
         });
 
@@ -280,7 +294,6 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, ForecastActivity.class);
-//                Intent intent = new Intent(MainActivity.this, Main2Activity.class);
                 intent.putExtra(CHOOSE_CITY, currentCity);
                 startActivity(intent);
             }
@@ -481,8 +494,8 @@ public class MainActivity extends AppCompatActivity
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 // Это та самая пермиссия, что мы запрашивали?
         if (requestCode == PERMISSION_REQUEST_CODE) {
-            if (grantResults.length == 2 &&
-                    (grantResults[0] == PackageManager.PERMISSION_GRANTED || grantResults[1] == PackageManager.PERMISSION_GRANTED)) {
+            if (grantResults.length == 2 && (grantResults[0] == PackageManager.PERMISSION_GRANTED
+                    || grantResults[1] == PackageManager.PERMISSION_GRANTED)) {
                 // Пермиссия дана
                 requestLocation();
             }
@@ -493,6 +506,10 @@ public class MainActivity extends AppCompatActivity
     protected void onSaveInstanceState(Bundle outState) {
         outState.putString(CITY, currentCity);
         super.onSaveInstanceState(outState);
+    }
+
+    public static boolean isCelsius() {
+        return isCelsius;
     }
 }
 

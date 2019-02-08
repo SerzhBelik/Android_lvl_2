@@ -31,5 +31,7 @@
     <string name="hpa"> кПа</string>
     <string name="pos">Мое положение</string>
     <string name="Sorry">Извините, город не найден!</string>
+    <string name="Error">Ошибка</string>
+    <string name="enter_city">Введите Ваш город</string>
 
 </resources>

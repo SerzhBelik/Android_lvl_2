@@ -132,12 +132,17 @@ public class ForecastActivity extends AppCompatActivity{
 
     private void formWeatherData() {
         for (int i = 0; i < weatherDayList.size(); i++) {
-            tempData[i] = getResources().getString(R.string.temper) + " " +
-                    String.valueOf((int)(((weatherDayList.get(i).getTemp() - 273)* 10)) / 10) +
-                    MainActivity.CELSIUS;
+            if (MainActivity.isCelsius()) {
+                tempData[i] = getResources().getString(R.string.temper) + " " +
+                        String.valueOf((int) (((weatherDayList.get(i).getTemp() - 273) * 10)) / 10) +
+                        MainActivity.CELSIUS;
+            } else tempData[i] = getResources().getString(R.string.temper) + " " +
+                    String.valueOf(((float)((int)(((weatherDayList.get(i).getTemp()-273)*9/5+32))*10))/10) +
+                    MainActivity.FAHRENHEIT;
+
 
             windData[i] = getResources().getString(R.string.wind) + " " +
-                    " " + weatherDayList.get(i).getWind().getSpeed() + getResources().getString(R.string.mps);
+                    " " + weatherDayList.get(i).getWind().getSpeed() + " " + getResources().getString(R.string.mps);
 
             humidData[i] = getResources().getString(R.string.humid) + " " +
                     weatherDayList.get(i).getHumid() + "%";
